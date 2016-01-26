@@ -1,0 +1,12 @@
+{
+  "name": "comment-serializer",
+  "version": "0.0.1",
+  "description": "A Serializer of Comments",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Ryan Fitzer",
+  "license": "MIT"
+}
