@@ -1,6 +1,5 @@
 var util = require( 'util' );
 var path = require( 'path' );
-var fst = require( './lib/fst' );
 
 var patterns = {
     begin: '/**',
@@ -11,31 +10,17 @@ var patterns = {
     tagName: /@\w+/
 };
 
-// Temp
-var comments = fst.readFile( './examples.js' );
+function init( src, options ) {
 
-module.exports = function ( src, options ) {
+    var exploded = explodeComments( src );
 
-    return comments
-    .then( explodeComments )
-    .then( function( sections ) {
+    return exploded.reduce( function( collection, section ) {
 
-        return sections.reduce( function( collection, section ) {
+        collection.push( serialize( section ) );
 
-            collection.push( serialize( section ) );
-
-            return collection;
-        }, [] );
-    })
-    .catch( function ( err ) {
-        console.log(err);
-    });
+        return collection;
+    }, [] );
 }
-// Temp
-().then( function ( collection ) {
-
-    console.log( util.inspect( collection, { depth: 5, colors: true } ) );
-});
 
 /**
  *
@@ -76,7 +61,7 @@ function serialize( section ) {
         , tags = source.replace( preface, '' ).match( patterns.tagBlock )
         ;
 
-    var tags = tags.map( function ( block ) {
+    tags = tags.map( function ( block ) {
 
         var trimmed = block.trim();
 
@@ -107,7 +92,7 @@ function serialize( section ) {
                         tag: '', // The name of the tag
                         line: 3, // The line number the tag starts on
                         source: '' // Full source of the tag
-                        // Any other props are via parsers
+                        // Any other props are via custom parsers
                     },
                     {
                         // ...
@@ -124,4 +109,12 @@ function serialize( section ) {
 function parseTags( tags ) {
 
     return tags;
+}
+
+module.exports = function ( options ) {
+
+    return function ( src ) {
+
+        return init( src, options );
+    };
 }
