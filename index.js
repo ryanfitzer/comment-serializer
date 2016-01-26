@@ -1,6 +1,8 @@
 var util = require( 'util' );
 var path = require( 'path' );
 
+
+var rLeadSpaces = /^\s*/;
 var patterns = {
     begin: '/**',
     body: '*',
@@ -10,13 +12,13 @@ var patterns = {
     tagName: /@\w+/
 };
 
-function init( src, options ) {
+function init( src ) {
 
     var exploded = explodeComments( src );
 
     return exploded.reduce( function( collection, section ) {
 
-        collection.push( serialize( section ) );
+        collection.push( serialize( section.shift(), section ) );
 
         return collection;
     }, [] );
@@ -28,19 +30,32 @@ function init( src, options ) {
 function explodeComments( comments ) {
 
     var sections = comments.split( patterns.begin );
+    var startLine = sections.shift();
+    var startLineNumber = startLine.split( '\n' ).length;
 
     return sections.reduce( function ( collection, section, index ) {
 
+        var nextLine = startLineNumber;
+
         if ( section ) {
+
+            nextLine = startLineNumber + section.split( '\n' ).length;
 
             section = section.split( patterns.end ).map( function ( block ) {
 
-                return block.split( '\n' ).map( function ( line, index ) {
+                block = block.split( '\n' ).map( function ( line, index ) {
 
-                    return line.replace( patterns.body, '' );
+                    return line.replace( rLeadSpaces, '' )
+                        .replace( patterns.body, '' )
+                        .replace( /^\s/, '' );
 
                 }).join( '\n' );
+
+                return block;
             });
+
+            section.unshift( startLineNumber );
+            startLineNumber = nextLine - 1;
 
             collection.push( section );
         }
@@ -53,11 +68,11 @@ function explodeComments( comments ) {
 /**
  *
  */
-function serialize( section ) {
+function serialize( lineNumber, section ) {
 
     var source = section[0]
         , context = section[1]
-        , preface = source.split( patterns.preface )[0]
+        , preface = source.split( patterns.preface )[0].trim()
         , tags = source.replace( preface, '' ).match( patterns.tagBlock )
         ;
 
@@ -73,12 +88,11 @@ function serialize( section ) {
     });
 
     return {
-        line: 'TODO',
+        line: lineNumber,
         preface: preface,
         source: source,
         context: context,
         tags: parseTags( tags )
-
     };
     /*
         [
