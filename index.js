@@ -1,22 +1,40 @@
 var util = require( 'util' );
-var path = require( 'path' );
+var parsers = require( './lib/tag-parsers' );
 
-
-var rLeadSpaces = /^\s*/;
 var patterns = {
-    begin: '/**',
-    body: '*',
-    end: '*/',
-    preface: /.*@(.+)\s/,
-    tagBlock: /(@[^@]*)/g,
-    tagName: /@\w+/
+    commentBegin: '/**',
+    commentEnd: '*/',
+    commentLinePrefix: '*',
+    tagPrefix: '@'
 };
 
+var rLeadSpaces = /^\s*/;
+var rCommentPreface = new RegExp( `.*${patterns.tagPrefix}(.+)\\s` );
+var rTagName = new RegExp( `${patterns.tagPrefix}\\w+` );
+var rTagBlock = new RegExp( `(${patterns.tagPrefix}[^${patterns.tagPrefix}]*)`, 'g' );
+
+module.exports = setup;
+module.exports.parsers = parsers;
+
+/**
+ *
+ */
+function setup( src, options ) {
+
+    getPatterns = getPatterns.bind( options );
+    getParsers = getParsers.bind( options );
+
+    return init( src );
+}
+
+/**
+ *
+ */
 function init( src ) {
 
-    var exploded = explodeComments( src );
+    var sections = explodeComments( src );
 
-    return exploded.reduce( function( collection, section ) {
+    return sections.reduce( function( collection, section ) {
 
         collection.push( serialize( section.shift(), section ) );
 
@@ -27,13 +45,44 @@ function init( src ) {
 /**
  *
  */
+function getPatterns() {
+
+    var tokens = Object.assign({
+        commentBegin: '/**',
+        commentEnd: '*/',
+        commentLinePrefix: '*',
+        tagPrefix: '@'
+    }, this.tokens );
+
+    var regexps = {
+        leadSpaces: /^\s*/,
+        commentPreface: new RegExp( `.*${tokens.tagPrefix}(.+)\\s` ),
+        tagName: new RegExp( `${tokens.tagPrefix}\\w+` ),
+        tagBlock: new RegExp( `(${tokens.tagPrefix}[^${tokens.tagPrefix}]*)`, 'g' )
+    };
+
+    return Object.assign( tokens, regexps );
+}
+
+/**
+ *
+ */
+function getParsers() {
+
+    return this.parsers || {};
+}
+
+/**
+ *
+ */
 function explodeComments( comments ) {
 
-    var sections = comments.split( patterns.begin );
+    var sections = comments.split( patterns.commentBegin );
     var startLine = sections.shift();
-    var startLineNumber = startLine.split( '\n' ).length;
+    // Add an extra line to make up for the commentBegin line
+    var startLineNumber = getLinesLength( startLine ) + 1;
 
-    return sections.reduce( function ( collection, section, index ) {
+    return sections.reduce( function ( collection, section ) {
 
         var nextLine = startLineNumber;
 
@@ -41,12 +90,12 @@ function explodeComments( comments ) {
 
             nextLine = startLineNumber + section.split( '\n' ).length;
 
-            section = section.split( patterns.end ).map( function ( block ) {
+            section = section.split( patterns.commentEnd ).map( function ( block ) {
 
-                block = block.split( '\n' ).map( function ( line, index ) {
+                block = block.split( '\n' ).map( function ( line ) {
 
                     return line.replace( rLeadSpaces, '' )
-                        .replace( patterns.body, '' )
+                        .replace( patterns.commentLinePrefix, '' )
                         .replace( /^\s/, '' );
 
                 }).join( '\n' );
@@ -70,51 +119,42 @@ function explodeComments( comments ) {
  */
 function serialize( lineNumber, section ) {
 
-    var source = section[0]
-        , context = section[1]
-        , preface = source.split( patterns.preface )[0].trim()
-        , tags = source.replace( preface, '' ).match( patterns.tagBlock )
+    var output
+        , source = section[0]
+        , context = section[1].trim()
+        , preface = source.split( rCommentPreface )[0].trim()
+        , tags = source.replace( preface, '' ).match( rTagBlock )
         ;
+
+    var startingIndex = lineNumber + getLinesLength( source.split( rCommentPreface )[0] );
 
     tags = tags.map( function ( block ) {
 
-        var trimmed = block.trim();
+        var trimmed = block.trim()
+            , tag = trimmed.match( rTagName )[0]
+            ;
 
-        return {
-            tag: trimmed.match( patterns.tagName )[0],
-            line: 'TODO',
+        var result = {
+            tag: tag.replace( patterns.tagPrefix, '' ),
+            value: trimmed.replace( tag, '' ).trim(),
+            line: startingIndex,
             source: trimmed
         };
+
+        startingIndex = startingIndex + getLinesLength( block );
+
+        return result;
     });
 
-    return {
+    output = {
         line: lineNumber,
         preface: preface,
         source: source,
         context: context,
         tags: parseTags( tags )
     };
-    /*
-        [
-            {
-                line: 0, // The line number the comment starts on
-                preface: '', // Any text found before start of first @tag
-                source: '', // Full source of the comment
-                context: '', // All code found between end of comment and start of next comment, or EOF
-                tags: [
-                    {
-                        tag: '', // The name of the tag
-                        line: 3, // The line number the tag starts on
-                        source: '' // Full source of the tag
-                        // Any other props are via custom parsers
-                    },
-                    {
-                        // ...
-                    }
-                ]
-            }
-        ]
-    */
+
+    return output;
 }
 
 /**
@@ -122,13 +162,31 @@ function serialize( lineNumber, section ) {
  */
 function parseTags( tags ) {
 
-    return tags;
+    return tags.map( function ( tag ) {
+
+        var parser = parsers[ tag.tag ];
+
+        if ( parser ) {
+
+            try {
+
+                tag = Object.assign( tag, parser( tag.value ) );
+            }
+            catch ( err ) {
+
+                tag.error = err;
+            }
+        }
+
+        return tag;
+    });
 }
 
-module.exports = function ( options ) {
+/**
+ *
+ */
+function getLinesLength( text ) {
 
-    return function ( src ) {
-
-        return init( src, options );
-    };
+    // Subtract 1 for last '\n'
+    return text.split( '\n' ).length - 1;
 }

@@ -1,4 +1,5 @@
 node_modules
+.vscode
 .tm_properties
 *.sublime-project
 *.sublime-workspace

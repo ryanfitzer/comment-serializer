@@ -12,15 +12,15 @@ for (var i = 0; i < 10; i++) {
      *     This is a tabbed line (4 spaces)
      *
      * @title One Element
-     * @example
+     * @example The description of the example
      *  <div class="flash-block">
      *      <div class="flash-block-content">
      *          Success Message
      *      </div>
      *  </div>
      * @modifier .flash-block-success JS added class that disables the block disappearing
-     * @modifier :focus Special animated hover focus state
-     * @modifier :hover Special animated hover focus state
+     * @state :focus Special animated hover focus state
+     * @state :hover Special animated hover focus state
      */
     var ryan = 'one';
 
@@ -34,8 +34,8 @@ for (var i = 0; i < 10; i++) {
  *
  * @title Button
  *
- * @modifier `.cta` primary coloring
- * @modifier :hover transition animation on hover
+ * @modifier .cta primary coloring
+ * @state :hover transition animation on hover
  *
  * @example The example description
  *  <a class="btn" href="#">a.btn</a>
@@ -63,8 +63,8 @@ var ryan = 'two';
  *      </div>
  *  </div>
  * @modifier .flash-block-success JS added class that disables the block disappearing
- * @modifier :focus Special animated hover focus state
- * @modifier :hover Special animated hover focus state
+ * @state :focus Special animated hover focus state
+ * @state :hover Special animated hover focus state
  */
 var ryan = 'three';
 
@@ -92,8 +92,8 @@ var ryan = 'three';
  *      </div>
  *  </div>
  * @modifier .flash-block-success JS added class that disables the block disappearing
- * @modifier :focus Special animated hover focus state
- * @modifier :hover Special animated hover focus state
+ * @state :focus Special animated hover focus state
+ * @state :hover Special animated hover focus state
  */
 var ryan = 'four';
 
