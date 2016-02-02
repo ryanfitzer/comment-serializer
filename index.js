@@ -1,192 +1,167 @@
 var util = require( 'util' );
-var parsers = require( './lib/tag-parsers' );
+var parserFactory = require( './lib/parsers' );
 
-var patterns = {
-    commentBegin: '/**',
-    commentEnd: '*/',
-    commentLinePrefix: '*',
-    tagPrefix: '@'
-};
+module.exports = factory;
+module.exports.parsers = parserFactory;
 
-var rLeadSpaces = /^\s*/;
-var rCommentPreface = new RegExp( `.*${patterns.tagPrefix}(.+)\\s` );
-var rTagName = new RegExp( `${patterns.tagPrefix}\\w+` );
-var rTagBlock = new RegExp( `(${patterns.tagPrefix}[^${patterns.tagPrefix}]*)`, 'g' );
+function factory( config ) {
 
-module.exports = setup;
-module.exports.parsers = parsers;
+    var options = config || {};
 
-/**
- *
- */
-function setup( src, options ) {
-
-    getPatterns = getPatterns.bind( options );
-    getParsers = getParsers.bind( options );
-
-    return init( src );
-}
-
-/**
- *
- */
-function init( src ) {
-
-    var sections = explodeComments( src );
-
-    return sections.reduce( function( collection, section ) {
-
-        collection.push( serialize( section.shift(), section ) );
-
-        return collection;
-    }, [] );
-}
-
-/**
- *
- */
-function getPatterns() {
-
-    var tokens = Object.assign({
+    var patterns = Object.assign({
         commentBegin: '/**',
         commentEnd: '*/',
         commentLinePrefix: '*',
         tagPrefix: '@'
-    }, this.tokens );
+    }, options.tokens );
 
-    var regexps = {
-        leadSpaces: /^\s*/,
-        commentPreface: new RegExp( `.*${tokens.tagPrefix}(.+)\\s` ),
-        tagName: new RegExp( `${tokens.tagPrefix}\\w+` ),
-        tagBlock: new RegExp( `(${tokens.tagPrefix}[^${tokens.tagPrefix}]*)`, 'g' )
-    };
+    var rLeadSpaces = /^\s*/;
+    var rCommentPreface = new RegExp( `.*${patterns.tagPrefix}(.+)\\s` );
+    var rTagName = new RegExp( `${patterns.tagPrefix}\\w+` );
+    var rTagBlock = new RegExp( `(${patterns.tagPrefix}[^${patterns.tagPrefix}]*)`, 'g' );
+    var parsers = options.parsers || {};
 
-    return Object.assign( tokens, regexps );
-}
+    /**
+     *
+     */
+    function explodeComments( comments ) {
 
-/**
- *
- */
-function getParsers() {
+        var sections = comments.split( patterns.commentBegin );
+        var startLine = sections.shift();
+        // Add an extra line to make up for the commentBegin line that get removed during split
+        var startLineNumber = getLinesLength( startLine ) + 1;
 
-    return this.parsers || {};
-}
+        return sections.reduce( function ( collection, section ) {
 
-/**
- *
- */
-function explodeComments( comments ) {
+            var splitSection
+                , nextLine = startLineNumber
+                ;
 
-    var sections = comments.split( patterns.commentBegin );
-    var startLine = sections.shift();
-    // Add an extra line to make up for the commentBegin line
-    var startLineNumber = getLinesLength( startLine ) + 1;
+            if ( section ) {
 
-    return sections.reduce( function ( collection, section ) {
+                splitSection = section.split( patterns.commentEnd );
+                nextLine = startLineNumber + section.split( '\n' ).length;
 
-        var nextLine = startLineNumber;
+                // Since multiple `commentEnd` tokens could be present in
+                // a section, we need to manually split section into two parts
+                section = [
+                    splitSection[0],
+                    splitSection.slice( 1 ).join( patterns.commentEnd )
+                ];
 
-        if ( section ) {
+                section = section.map( function ( block ) {
 
-            nextLine = startLineNumber + section.split( '\n' ).length;
+                    block = block.split( '\n' ).map( function ( line ) {
 
-            section = section.split( patterns.commentEnd ).map( function ( block ) {
+                        return line.replace( rLeadSpaces, '' )
+                            .replace( patterns.commentLinePrefix, '' )
+                            .replace( /^\s/, '' );
 
-                block = block.split( '\n' ).map( function ( line ) {
+                    }).join( '\n' );
 
-                    return line.replace( rLeadSpaces, '' )
-                        .replace( patterns.commentLinePrefix, '' )
-                        .replace( /^\s/, '' );
+                    return block;
+                });
 
-                }).join( '\n' );
+                section.unshift( startLineNumber );
+                startLineNumber = nextLine - 1;
 
-                return block;
-            });
+                collection.push( section );
+            }
 
-            section.unshift( startLineNumber );
-            startLineNumber = nextLine - 1;
+            return collection;
 
-            collection.push( section );
-        }
+        }, [] );
+    }
 
-        return collection;
+    /**
+     *
+     */
+    function serialize( lineNumber, section ) {
 
-    }, [] );
-}
-
-/**
- *
- */
-function serialize( lineNumber, section ) {
-
-    var output
-        , source = section[0]
-        , context = section[1].trim()
-        , preface = source.split( rCommentPreface )[0].trim()
-        , tags = source.replace( preface, '' ).match( rTagBlock )
-        ;
-
-    var startingIndex = lineNumber + getLinesLength( source.split( rCommentPreface )[0] );
-
-    tags = tags.map( function ( block ) {
-
-        var trimmed = block.trim()
-            , tag = trimmed.match( rTagName )[0]
+        var output
+            , source = section[0]
+            , context = section[1].trim()
+            , preface = source.split( rCommentPreface )[0].trim()
+            , tags = source.replace( preface, '' ).match( rTagBlock )
             ;
 
-        var result = {
-            tag: tag.replace( patterns.tagPrefix, '' ),
-            value: trimmed.replace( tag, '' ).trim(),
-            line: startingIndex,
-            source: trimmed
+        var startingIndex = lineNumber + getLinesLength( source.split( rCommentPreface )[0] );
+
+        tags = tags.map( function ( block ) {
+
+            var trimmed = block.trim()
+                , tag = trimmed.match( rTagName )[0]
+                ;
+
+            var result = {
+                tag: tag.replace( patterns.tagPrefix, '' ),
+                value: trimmed.replace( tag, '' ).trim(),
+                line: startingIndex,
+                source: trimmed
+            };
+
+            startingIndex = startingIndex + getLinesLength( block );
+
+            return result;
+        });
+
+        output = {
+            line: lineNumber,
+            preface: preface,
+            source: source,
+            context: context,
+            tags: parseTags( tags )
         };
 
-        startingIndex = startingIndex + getLinesLength( block );
+        return output;
+    }
 
-        return result;
-    });
+    /**
+     *
+     */
+    function parseTags( tags ) {
 
-    output = {
-        line: lineNumber,
-        preface: preface,
-        source: source,
-        context: context,
-        tags: parseTags( tags )
-    };
+        return tags.map( function ( tag ) {
 
-    return output;
-}
+            var parser = parsers[ tag.tag ];
 
-/**
- *
- */
-function parseTags( tags ) {
+            if ( parser ) {
 
-    return tags.map( function ( tag ) {
+                try {
 
-        var parser = parsers[ tag.tag ];
+                    tag = Object.assign( tag, parser( tag.value ) );
+                }
+                catch ( err ) {
 
-        if ( parser ) {
-
-            try {
-
-                tag = Object.assign( tag, parser( tag.value ) );
+                    tag.error = err;
+                }
             }
-            catch ( err ) {
 
-                tag.error = err;
-            }
-        }
+            return tag;
+        });
+    }
 
-        return tag;
-    });
-}
+    /**
+     *
+     */
+    function getLinesLength( text ) {
 
-/**
- *
- */
-function getLinesLength( text ) {
+        // Subtract 1 for last '\n'
+        return text.split( '\n' ).length - 1;
+    }
 
-    // Subtract 1 for last '\n'
-    return text.split( '\n' ).length - 1;
+    /**
+     *
+     */
+    return function ( src ) {
+
+        var sections = explodeComments( src );
+
+        return sections.reduce( function( collection, section ) {
+
+            collection.push( serialize( section.shift(), section ) );
+
+            return collection;
+        }, [] );
+    }
 }
