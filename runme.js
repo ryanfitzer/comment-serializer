@@ -39,7 +39,7 @@ fst.readFile( './examples.js' ).then( function ( src ) {
         });
     });
 
-    console.log( util.inspect( comments, { depth: 5, colors: true } ) );
+    // console.log( util.inspect( comments, { depth: 5, colors: true } ) );
 
     if ( hasErrors ) console.log( 'Errors!' );
 })

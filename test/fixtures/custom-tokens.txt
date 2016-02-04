@@ -1,0 +1,12 @@
+/**documentation
+ *Line
+ *Line This is a documentation block.
+ *Line
+ *Line ^title DocBlock
+ **/
+var one = 'one';
+
+/**
+ * This is just a standard comment block.
+ */
+var two = 'two';

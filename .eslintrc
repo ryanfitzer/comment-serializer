@@ -4,7 +4,8 @@
         "templateStrings": true
     },
     "env": {
-        "node": true
+        "node": true,
+        "mocha": true
     },
     "rules": {
         "accessor-pairs": 0,

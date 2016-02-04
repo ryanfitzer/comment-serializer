@@ -15,11 +15,15 @@ function factory( config ) {
         tagPrefix: '@'
     }, options.tokens );
 
+    // Example: https://github.com/VerbalExpressions/JSVerbalExpressions/blob/master/VerbalExpressions.js#L63
+    var safeTagBlock = patterns.tagPrefix.replace( /([\].|*?+(){}^$\\:=[])/g, '\\$&' );
+
     var rLeadSpaces = /^\s*/;
-    var rCommentPreface = new RegExp( `.*${patterns.tagPrefix}(.+)\\s` );
-    var rTagName = new RegExp( `${patterns.tagPrefix}\\w+` );
-    var rTagBlock = new RegExp( `(${patterns.tagPrefix}[^${patterns.tagPrefix}]*)`, 'g' );
+    var rCommentPreface = new RegExp( `.*${safeTagBlock}(.+)\\s` );
+    var rTagName = new RegExp( `${safeTagBlock}\\w+` );
+    var rTagBlock = new RegExp( `(${safeTagBlock}[^${safeTagBlock}]*)`, 'g' );
     var parsers = options.parsers || {};
+
 
     /**
      *
@@ -146,8 +150,8 @@ function factory( config ) {
      */
     function getLinesLength( text ) {
 
-        // Subtract 1 for last '\n'
-        return text.split( '\n' ).length - 1;
+        // Remove trailing new line beforehand
+        return text.replace( /\n$/m, '' ).split( '\n' ).length;
     }
 
     /**
