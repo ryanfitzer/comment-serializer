@@ -1,6 +1,6 @@
 var util = require( 'util' );
 
-var fst = require( './lib/fst' );
+var fsp = require( './lib/fsp' );
 var serializer = require( './index' );
 
 var mySerializer = serializer({
@@ -29,7 +29,7 @@ var mySerializer = serializer({
     })
 });
 
-fst.readFile( './examples.js' ).then( function ( src ) {
+fsp.readFile( './runme-examples.js' ).then( function ( src ) {
 
     var comments = mySerializer( src );
     var hasErrors = comments.some( function ( comment ) {

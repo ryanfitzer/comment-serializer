@@ -86,7 +86,7 @@ function factory( config ) {
             , source = section[0]
             , context = section[1].trim()
             , preface = source.split( rCommentPreface )[0].trim()
-            , tags = source.replace( preface, '' ).match( rTagBlock )
+            , tags = source.replace( preface, '' ).match( rTagBlock ) || []
             ;
 
         var startingIndex = lineNumber + getLinesLength( source.split( rCommentPreface )[0] );
