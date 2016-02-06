@@ -1,14 +1,20 @@
 {
   "name": "comment-serializer",
   "version": "0.0.1",
+  "author": "Ryan Fitzer",
   "description": "A Serializer of Comments",
+  "license": "MIT",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha"
+    "test": "./node_modules/mocha/bin/mocha",
+    "jscs": "jscs --verbose --fix $npm_package_config_jscs_files"
+  },
+  "config": {
+    "jscs": {
+      "files": "index.js lib/*.js test/*.js"
+    }
   },
   "keywords": [],
-  "author": "Ryan Fitzer",
-  "license": "MIT",
   "devDependencies": {
     "mocha": "^2.4.5"
   }

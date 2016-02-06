@@ -24,7 +24,6 @@ function factory( config ) {
     var rTagBlock = new RegExp( `(${safeTagBlock}[^${safeTagBlock}]*)`, 'g' );
     var parsers = options.parsers || {};
 
-
     /**
      *
      */
@@ -32,10 +31,11 @@ function factory( config ) {
 
         var sections = comments.split( patterns.commentBegin );
         var startLine = sections.shift();
+
         // Add an extra line to make up for the commentBegin line that get removed during split
         var startLineNumber = getLinesLength( startLine ) + 1;
 
-        return sections.reduce( function ( collection, section ) {
+        return sections.reduce( function( collection, section ) {
 
             var splitSection
                 , nextLine = startLineNumber
@@ -53,9 +53,9 @@ function factory( config ) {
                     splitSection.slice( 1 ).join( patterns.commentEnd )
                 ];
 
-                section = section.map( function ( block ) {
+                section = section.map( function( block ) {
 
-                    block = block.split( '\n' ).map( function ( line ) {
+                    block = block.split( '\n' ).map( function( line ) {
 
                         return line.replace( rLeadSpaces, '' )
                             .replace( patterns.commentLinePrefix, '' )
@@ -91,7 +91,7 @@ function factory( config ) {
 
         var startingIndex = lineNumber + getLinesLength( source.split( rCommentPreface )[0] );
 
-        tags = tags.map( function ( block ) {
+        tags = tags.map( function( block ) {
 
             var trimmed = block.trim()
                 , tag = trimmed.match( rTagName )[0]
@@ -125,7 +125,7 @@ function factory( config ) {
      */
     function parseTags( tags ) {
 
-        return tags.map( function ( tag ) {
+        return tags.map( function( tag ) {
 
             var parser = parsers[ tag.tag ];
 
@@ -157,7 +157,7 @@ function factory( config ) {
     /**
      *
      */
-    return function ( src ) {
+    return function( src ) {
 
         var sections = explodeComments( src );
 
@@ -167,5 +167,5 @@ function factory( config ) {
 
             return collection;
         }, [] );
-    }
+    };
 }

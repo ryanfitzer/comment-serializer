@@ -3,7 +3,23 @@ for (var i = 0; i < 10; i++) {
     // do something
 }
 
-
+    /**
+     * This is the general description.
+     *
+     *     This is a tabbed line (4 spaces)
+     *     This is a tabbed line (4 spaces)
+     *
+     * @title One Element
+     * @example The description of the example
+     *  <div class="flash-block">
+     *      <div class="flash-block-content">
+     *          Success Message
+     *      </div>
+     *  </div>
+     * @modifier .flash-block-success JS added class that disables the block disappearing
+     * @state :focus Special animated hover focus state
+     * @state :hover Special animated hover focus state
+     */
 
     /**
      * This is the general description.

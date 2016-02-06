@@ -1,5 +1,3 @@
-/*eslint global-require: 0*/
-
 var util = require( 'util' );
 var path = require( 'path' );
 var assert = require( 'assert' );  /* https://nodejs.org/api/assert.html */
@@ -36,14 +34,13 @@ var tmplComment = template`
 
 describe( 'Custom Tokens', function() {
 
-    var tokenVariations = [
+    [
         [ '/**',        '*',        '*/',   '@' ],
         [ '/**docs',    '*Line',    '**/',  '^' ]
-    ];
 
-    tokenVariations.forEach( function ( tokens ) {
+    ].forEach( function( tokens ) {
 
-        it( `should replace the default tokens with: ${ tokens.join( ', ' ) }`, function () {
+        it( `should replace the default tokens with: ${ tokens.join( ', ' ) }`, function() {
 
             var source = tmplComment.apply( tmplComment, tokens );
             var result = serializer({
@@ -55,7 +52,7 @@ describe( 'Custom Tokens', function() {
                 }
             })( source );
 
-            // assert.deepEqual( expected, actual );
+            // Assert.deepEqual( expected, actual );
         });
 
     });
