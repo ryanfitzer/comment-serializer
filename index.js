@@ -16,10 +16,17 @@ function factory( config ) {
     }, options.tokens );
 
     // Example: https://github.com/VerbalExpressions/JSVerbalExpressions/blob/master/VerbalExpressions.js#L63
-    var safeTagBlock = patterns.tagPrefix.replace( /([\].|*?+(){}^$\\:=[])/g, '\\$&' );
+    var rCharacterClasses = /([\].|*?+(){}^$\\:=[])/g;
 
-    var rLeadSpaces = /^\s*/;
+    // Last match, URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/lastMatch
+    var lastMatch = '\\$&';
+
+    var safeTagBlock = patterns.tagPrefix.replace( rCharacterClasses, lastMatch );
+    var safeCommentLinePrefix = patterns.commentLinePrefix.replace( rCharacterClasses, lastMatch );
+
+    var rLeadSpaces = /^[^\S\n]*/;
     var rCommentPreface = new RegExp( `.*${safeTagBlock}(.+)\\s` );
+    var rCommentLinePrefix = new RegExp( `^(\\s)*${safeCommentLinePrefix}\\s?` );
     var rTagName = new RegExp( `${safeTagBlock}\\w+` );
     var rTagBlock = new RegExp( `(${safeTagBlock}[^${safeTagBlock}]*)`, 'g' );
     var parsers = options.parsers || {};
@@ -57,9 +64,7 @@ function factory( config ) {
 
                     block = block.split( '\n' ).map( function( line ) {
 
-                        return line.replace( rLeadSpaces, '' )
-                            .replace( patterns.commentLinePrefix, '' )
-                            .replace( /^\s/, '' );
+                        return line.replace( rCommentLinePrefix, '' );
 
                     }).join( '\n' );
 
@@ -99,7 +104,7 @@ function factory( config ) {
 
             var result = {
                 tag: tag.replace( patterns.tagPrefix, '' ),
-                value: trimmed.replace( tag, '' ).trim(),
+                value: trimmed.replace( tag, '' ).replace( rLeadSpaces, '' ),
                 line: startingIndex,
                 source: trimmed
             };

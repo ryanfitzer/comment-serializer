@@ -1,11 +1,9 @@
 var util = require( 'util' );
 var assert = require( 'assert' );
 
-var fsp = require( './lib/fsp' );
 var serializer = require( './index' );
-var fixture = require( './test/lib/example-output' );
-
-var test = require( './test/lib/tagged-source-string' );
+var templateOutput = require( './test/lib/example-output' );
+var templateComments = require( './test/lib/tagged-source-string' );
 
 var tokens = {
     'commentBegin': '/**',
@@ -14,54 +12,44 @@ var tokens = {
     'tagPrefix': '@'
 };
 
-var src = test( tokens );
+// var parsers = serializer.parsers();
+// var parsers = serializer.parsers({
+//     'example': function( value ) {
+//
+//         var match = value.match( /([^\n]*)\n((?:.|\n)*)/ );
+//
+//         var result = {
+//             exampleTest: value,
+//             descriptionTest: ''
+//         };
+//
+//         if ( match ) {
+//
+//             result.exampleOne = match[2];
+//             result.descriptionOne = match[1];
+//         }
+//
+//         return result;
+//     }
+// });
+
+var expected = templateOutput( tokens );
 var mySerializer = serializer({
-    tokens: tokens,
-    // parsers: serializer.parsers({
-    //     'example': function( value ) {
-    //
-    //         var match = value.match( /([^\n]*)\n((?:.|\n)*)/ );
-    //
-    //         var result = {
-    //             exampleOne: value,
-    //             descriptionOne: ''
-    //         };
-    //
-    //         if ( match ) {
-    //
-    //             result.exampleOne = match[2];
-    //             result.descriptionOne = match[1];
-    //         }
-    //
-    //         return result;
-    //     }
-    // })
+    tokens: tokens
+    // , parsers: serializer.parsers()
+});
+var src = templateComments( tokens );
+var actual = mySerializer( src );
+var hasErrors = actual.some( function ( comment ) {
+
+    return comment.tags.some( function ( tag ) {
+        return tag.error;
+    });
 });
 
-var result = mySerializer( src );
+if ( hasErrors ) console.log( 'Errors!' );
+else console.log( util.inspect( actual, { depth: 5, colors: true } ) );
 
-// console.log( util.inspect( src, { depth: 5, colors: true } ) );
-// console.log( util.inspect( result, { depth: 5, colors: true } ) );
-// console.log( util.inspect( fixture, { depth: 5, colors: true } ) );
-assert.deepEqual( fixture, result );
+assert.deepEqual( expected, actual );
 
 
-
-// fsp.readFile( './runme-examples.js' ).then( function ( src ) {
-//
-//     var comments = mySerializer( src );
-//     var hasErrors = comments.some( function ( comment ) {
-//
-//         return comment.tags.some( function ( tag ) {
-//             return tag.error;
-//         });
-//     });
-//
-//     // console.log( util.inspect( comments, { depth: 5, colors: true } ) );
-//
-//     if ( hasErrors ) console.log( 'Errors!' );
-// })
-// .catch( function ( err ) {
-//
-//     console.log(err);
-// });
