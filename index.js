@@ -103,9 +103,10 @@ function factory( config ) {
                 ;
 
             var result = {
+                line: startingIndex,
                 tag: tag.replace( patterns.tagPrefix, '' ),
                 value: trimmed.replace( tag, '' ).replace( rLeadSpaces, '' ),
-                line: startingIndex,
+                valueParsed: [],
                 source: trimmed
             };
 
@@ -138,7 +139,8 @@ function factory( config ) {
 
                 try {
 
-                    tag = Object.assign( tag, parser( tag.value ) );
+                    // tag = Object.assign( tag, parser( tag.value ) );
+                    tag.valueParsed = parser( tag.value );
                 }
                 catch ( err ) {
 
