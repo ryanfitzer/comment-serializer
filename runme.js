@@ -33,7 +33,6 @@ var tokens = {
 //     }
 // });
 
-var expected = templateOutput( tokens );
 var mySerializer = serializer({
     tokens: tokens
     , parsers: serializer.parsers()
@@ -50,6 +49,5 @@ var hasErrors = actual.some( function ( comment ) {
 if ( hasErrors ) console.log( 'Errors!' );
 else console.log( util.inspect( actual, { depth: 10, colors: true } ) );
 
-// assert.deepEqual( expected, actual );
 
 

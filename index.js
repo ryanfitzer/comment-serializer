@@ -21,14 +21,14 @@ function factory( config ) {
     // Last match, URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/lastMatch
     var lastMatch = '\\$&';
 
-    var safeTagBlock = patterns.tagPrefix.replace( rCharacterClasses, lastMatch );
+    var safeTagPrefix = patterns.tagPrefix.replace( rCharacterClasses, lastMatch );
     var safeCommentLinePrefix = patterns.commentLinePrefix.replace( rCharacterClasses, lastMatch );
 
     var rLeadSpaces = /^[^\S\n]*/;
-    var rCommentPreface = new RegExp( `.*${safeTagBlock}(.+)\\s` );
+    var rCommentPreface = new RegExp( `.*${safeTagPrefix}(.+)\\s` );
     var rCommentLinePrefix = new RegExp( `^(\\s)*${safeCommentLinePrefix}\\s?` );
-    var rTagName = new RegExp( `${safeTagBlock}([\\w-])+` );
-    var rTagBlock = new RegExp( `(${safeTagBlock}[^${safeTagBlock}]*)`, 'g' );
+    var rTagName = new RegExp( `${safeTagPrefix}([\\w-])+` );
+    var rTagBlock = new RegExp( `(${safeTagPrefix}[^${safeTagPrefix}]*)`, 'g' );
     var parsers = options.parsers || {};
 
     /**
