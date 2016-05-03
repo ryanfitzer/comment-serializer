@@ -139,7 +139,7 @@ function factory( config ) {
 
                 try {
 
-                    // tag = Object.assign( tag, parser( tag.value ) );
+                    // Tag = Object.assign( tag, parser( tag.value ) );
                     tag.valueParsed = parser( tag.value );
                 }
                 catch ( err ) {
