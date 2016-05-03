@@ -27,7 +27,7 @@ function factory( config ) {
     var rLeadSpaces = /^[^\S\n]*/;
     var rCommentPreface = new RegExp( `.*${safeTagBlock}(.+)\\s` );
     var rCommentLinePrefix = new RegExp( `^(\\s)*${safeCommentLinePrefix}\\s?` );
-    var rTagName = new RegExp( `${safeTagBlock}\\w+` );
+    var rTagName = new RegExp( `${safeTagBlock}([\\w-])+` );
     var rTagBlock = new RegExp( `(${safeTagBlock}[^${safeTagBlock}]*)`, 'g' );
     var parsers = options.parsers || {};
 

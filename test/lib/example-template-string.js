@@ -11,7 +11,7 @@ for (var i = 0; i < 10; i++) {
      ${'commentLinePrefix'}     This is a tabbed line (4 spaces)
      ${'commentLinePrefix'}     This is a tabbed line (4 spaces)
      ${'commentLinePrefix'}
-     ${'commentLinePrefix'} ${'tagPrefix'}title One Element
+     ${'commentLinePrefix'} ${'tagPrefix'}title-multi-word One Element
      ${'commentLinePrefix'} ${'tagPrefix'}example The description of the example
      ${'commentLinePrefix'}  <div class="flash-block">
      ${'commentLinePrefix'}      <div class="flash-block-content">
