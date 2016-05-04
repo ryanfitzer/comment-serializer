@@ -2,9 +2,13 @@
   "name": "comment-serializer",
   "version": "0.2.0",
   "author": "Ryan Fitzer",
-  "description": "A Serializer of Comments",
+  "description": "A serializer of source code comments.",
   "license": "MIT",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ryanfitzer/comment-serializer.git"
+  },
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha",
     "jscs": "jscs --verbose --fix $npm_package_config_jscs_files"
@@ -14,7 +18,17 @@
       "files": "index.js lib/*.js test/*.js"
     }
   },
-  "keywords": [],
+  "keywords": [
+    "comment",
+    "comments",
+    "commentblock",
+    "comment block",
+    "comment parser",
+    "comments parser",
+    "docblock",
+    "doc block",
+    "documentation block"
+  ],
   "devDependencies": {
     "mocha": "^2.4.5"
   }
