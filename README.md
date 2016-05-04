@@ -1,14 +1,18 @@
-# Comment Serializer
+# Comment Serializer #
 
-Nothing to see yet...
+Not much to see yet...
 
-## Usage
+
+
+## Usage ##
 
 In early development, so just run it directly to see a demo that logs the results to the console:
 
 ```
 $ node runme
 ```
+
+
 
 ## Comment Object ##
 
@@ -34,4 +38,12 @@ $ node runme
         ]
     }
 ]
+```
+
+
+
+## Test
+
+```
+$ npm test
 ```
