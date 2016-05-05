@@ -1,5 +1,7 @@
 # Comment Serializer #
 
+[![NPM version](https://badge.fury.io/js/comment-serializer.svg)](https://www.npmjs.com/package/comment-serializer)
+
 [TODO]
 
 

@@ -9,6 +9,9 @@
     "type": "git",
     "url": "https://github.com/ryanfitzer/comment-serializer.git"
   },
+  "engines": {
+    "node": ">=4.0.0"
+  },
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha",
     "jscs": "jscs --verbose --fix $npm_package_config_jscs_files"
