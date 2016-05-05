@@ -1,10 +1,10 @@
 var util = require( 'util' );
-var assert = require( 'assert' );
-
 var serializer = require( './index' );
-var templateOutput = require( './test/lib/example-output' );
+
+// Template string for generating some sample source code with comments
 var templateComments = require( './test/lib/tagged-source-string' );
 
+// Configure comment delimiters
 var tokens = {
     'commentBegin': '/**',
     'commentLinePrefix': '*',
@@ -12,42 +12,28 @@ var tokens = {
     'tagPrefix': '@'
 };
 
-// var parsers = serializer.parsers();
-// var parsers = serializer.parsers({
-//     'example': function( value ) {
-//
-//         var match = value.match( /([^\n]*)\n((?:.|\n)*)/ );
-//
-//         var result = {
-//             exampleTest: value,
-//             descriptionTest: ''
-//         };
-//
-//         if ( match ) {
-//
-//             result.exampleOne = match[2];
-//             result.descriptionOne = match[1];
-//         }
-//
-//         return result;
-//     }
-// });
-
-var mySerializer = serializer({
-    tokens: tokens
-    , parsers: serializer.parsers()
-});
+// Create our sample from the template string
 var src = templateComments( tokens );
-var actual = mySerializer( src );
-var hasErrors = actual.some( function ( comment ) {
+
+// Intialize a serializer instance with some options
+var mySerializer = serializer({
+    tokens: tokens,
+    parsers: serializer.parsers()
+});
+
+var result = mySerializer( src );
+
+var hasErrors = result.some( function ( comment ) {
 
     return comment.tags.some( function ( tag ) {
         return tag.error;
     });
 });
 
-if ( hasErrors ) console.log( 'Errors!' );
-else console.log( util.inspect( actual, { depth: 10, colors: true } ) );
+// Log the results real pretty like
+console.log( util.inspect( result, { depth: 10, colors: true } ) );
 
+if ( hasErrors ) {
 
-
+    console.log( '\nErrors were found in one or more tags!' );
+}

@@ -1,12 +1,14 @@
 # Comment Serializer #
 
-Not much to see yet...
+[TODO]
 
 
 
 ## Usage ##
 
-In early development, so just run it directly to see a demo that logs the results to the console:
+[TODO]
+
+Run it directly to see a demo that logs the results to the console:
 
 ```
 $ node runme
@@ -14,7 +16,29 @@ $ node runme
 
 
 
+## Options ##
+
+[TODO]
+
+```js
+{
+    // These are the default delimiters
+    tokens: {
+        'commentBegin': '/**',
+        'commentLinePrefix': '*',
+        'commentEnd': '*/',
+        'tagPrefix': '@'
+    },
+    // These are example custom parsers from "lib/parsers.js"
+    parsers: serializer.parsers()
+}
+```
+
+
+
 ## What you Get Back ##
+
+[TODO]
 
 ```js
 [
@@ -31,7 +55,7 @@ $ node runme
                 source: '' // Full source of the tag block
                 error: {} // Present if any error was thrown
                 valueParsed: [
-                    // return value from custom parser
+                    // return value from custom tag parser
                 ]
             },
             {...},
@@ -41,7 +65,7 @@ $ node runme
 ]
 ```
 
-For example: With the following example content containing a comment block:
+For example: with the following example content containing a comment block:
 
 ```js
 /**
@@ -52,7 +76,7 @@ For example: With the following example content containing a comment block:
 var bar = 'foo';
 ```
 
-comment-serializer generates this `json`:
+comment-serializer will generate the following `json`:
 
 ```js
 [
@@ -77,10 +101,12 @@ comment-serializer generates this `json`:
 
 [TODO]
 
-Custom tag parsers can be provided. See `lib/parsers.js` as an example. These are used in `runme.js`.
+Custom tag parsers can be passed to the `options` argument. See `lib/parsers.js` as an example.
 
 
-## Test
+## Test ##
+
+[TODO]
 
 ```
 $ npm test
