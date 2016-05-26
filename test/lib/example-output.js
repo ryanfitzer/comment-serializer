@@ -4,14 +4,14 @@ function factory( tokens ) {
 
     return [ { line: 6,
         preface: 'This is the general description.\n\n    This is a tabbed line (4 spaces)\n    This is a tabbed line (4 spaces)',
-        source: `\nThis is the general description.\n\n    This is a tabbed line (4 spaces)\n    This is a tabbed line (4 spaces)\n\n${tokens.tagPrefix}title-multi-word One Element\n${tokens.tagPrefix}example The description of the example\n <div class="flash-block">\n     <div class="flash-block-content">\n         Success Message\n     </div>\n </div>\n${tokens.tagPrefix}modifier .flash-block-success JS added class that disables the block disappearing\n${tokens.tagPrefix}state :focus Special animated hover focus state\n${tokens.tagPrefix}state :hover Special animated hover focus state\n     `,
+        source: `\nThis is the general description.\n\n    This is a tabbed line (4 spaces)\n    This is a tabbed line (4 spaces)\n\n${tokens.tagPrefix}title-multi-word One ${tokens.tagPrefix} Element\n${tokens.tagPrefix}example The description of the example\n <div class="flash-block">\n     <div class="flash-block-content">\n         Success Message\n     </div>\n </div>\n${tokens.tagPrefix}modifier .flash-block-success JS added class that disables the block disappearing\n${tokens.tagPrefix}state :focus Special animated hover focus state\n${tokens.tagPrefix}state :hover Special animated hover focus state\n     `,
         context: '',
         tags:
          [ { tag: 'title-multi-word',
-             value: 'One Element',
+             value: `One ${tokens.tagPrefix} Element`,
              valueParsed: [],
              line: 12,
-             source: `${tokens.tagPrefix}title-multi-word One Element` },
+             source: `${tokens.tagPrefix}title-multi-word One ${tokens.tagPrefix} Element` },
            { tag: 'example',
              value: 'The description of the example\n <div class="flash-block">\n     <div class="flash-block-content">\n         Success Message\n     </div>\n </div>',
              valueParsed: [],

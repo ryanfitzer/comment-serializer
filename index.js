@@ -1,8 +1,8 @@
 var util = require( 'util' );
-var parserFactory = require( './lib/parsers' );
+var tagParsers = require( './lib/parsers' );
 
 module.exports = factory;
-module.exports.parsers = parserFactory;
+module.exports.parsers = tagParsers;
 
 function factory( config ) {
 
@@ -27,16 +27,24 @@ function factory( config ) {
     var rLeadSpaces = /^[^\S\n]*/;
     var rCommentPreface = new RegExp( `.*${safeTagPrefix}(.+)\\s` );
     var rCommentLinePrefix = new RegExp( `^(\\s)*${safeCommentLinePrefix}\\s?` );
-    var rTagName = new RegExp( `${safeTagPrefix}([\\w-])+` );
-    var rTagBlock = new RegExp( `(${safeTagPrefix}[^${safeTagPrefix}]*)`, 'g' );
+    var rTagName = new RegExp( `^${safeTagPrefix}([\\w-])+` );
     var parsers = options.parsers || {};
 
     /**
+     * Splits a string into an array of sections.
+     * The array has 3 parts:
+     *  - starting line number
+     *  - comment block stripped of `commentBegin`, `commentEnd` and
+     *    `commentLinePrefix` tokens, including leading spaces between
+     *    the `commentLinePrefix` and the `tagPrefix` tokens.
+     *  - all source between the `commentEnd` token and next `commentBegin` token.
      *
+     * @param sourceStr {String} The source to parse.
+     * @return {Array}
      */
-    function explodeComments( comments ) {
+    function explodeSections( sourceStr ) {
 
-        var sections = comments.split( patterns.commentBegin );
+        var sections = sourceStr.split( patterns.commentBegin );
         var startLine = sections.shift();
 
         // Add an extra line to make up for the commentBegin line that get removed during split
@@ -83,55 +91,77 @@ function factory( config ) {
     }
 
     /**
+     * Serialize a section into its various parts.
+     *  - line
+     *  - preface
+     *  - tags
+     *  - context
+     *  - source
      *
+     * @param lineNumber {Number} The comment's starting line number.
+     * @param section {String} The comment and its contextual source.
+     * @return {Object}
      */
-    function serialize( lineNumber, section ) {
+    function serializeBlock( lineNumber, section ) {
 
-        var output
-            , source = section[0]
+        var source = section[0]
             , context = section[1].trim()
             , preface = source.split( rCommentPreface )[0].trim()
-            , tags = source.replace( preface, '' ).match( rTagBlock ) || []
+            , tags = source.replace( preface, '' ).trim()
+            , startingIndex = lineNumber + getLinesLength( source.split( rCommentPreface )[0] )
             ;
 
-        var startingIndex = lineNumber + getLinesLength( source.split( rCommentPreface )[0] );
+        return {
+            line: lineNumber,
+            preface: preface,
+            tags: serializeTags( startingIndex, tags ),
+            context: context,
+            source: source
+        };
+    }
 
-        tags = tags.map( function( block ) {
+    /**
+     * Takes a tags block and serializes it into individual tag objects.
+     *
+     * @param lineNumber {Number} The tags block starting line number.
+     * @param tags {String} The tags block.
+     * @return {Array}
+     */
+    function serializeTags( lineNumber, tags ) {
+
+        return tags.split( /\n/ )
+        .reduce( function ( acc, line, index ) {
+
+            if ( !index || rTagName.test( line ) ) {
+                acc.push( `${line}\n` );
+            }
+            else {
+                acc[ acc.length - 1 ] += `${line}\n`;
+            }
+
+            return acc;
+
+        }, [] )
+        .map( function( block ) {
 
             var trimmed = block.trim()
-                , tag = trimmed.match( rTagName )[0]
+                // , tag = trimmed.match( rTagName )[0]
+                , tag = block.match( rTagName )[0]
                 ;
 
             var result = {
-                line: startingIndex,
+                line: lineNumber,
                 tag: tag.replace( patterns.tagPrefix, '' ),
                 value: trimmed.replace( tag, '' ).replace( rLeadSpaces, '' ),
                 valueParsed: [],
                 source: trimmed
             };
 
-            startingIndex = startingIndex + getLinesLength( block );
+            lineNumber = lineNumber + getLinesLength( block );
 
             return result;
-        });
-
-        output = {
-            line: lineNumber,
-            preface: preface,
-            source: source,
-            context: context,
-            tags: parseTags( tags )
-        };
-
-        return output;
-    }
-
-    /**
-     *
-     */
-    function parseTags( tags ) {
-
-        return tags.map( function( tag ) {
+        })
+        .map( function( tag ) {
 
             var parser = parsers[ tag.tag ];
 
@@ -166,11 +196,11 @@ function factory( config ) {
      */
     return function( src ) {
 
-        var sections = explodeComments( src );
+        var sections = explodeSections( src );
 
         return sections.reduce( function( collection, section ) {
 
-            collection.push( serialize( section.shift(), section ) );
+            collection.push( serializeBlock( section.shift(), section ) );
 
             return collection;
         }, [] );
