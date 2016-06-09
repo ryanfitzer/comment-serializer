@@ -2,7 +2,7 @@
 
 [![NPM version](https://badge.fury.io/js/comment-serializer.svg)](https://www.npmjs.com/package/comment-serializer)
 
-[TODO]
+Comment Serializer parses a source string for documentation comments and returns a serialized object. It is syntax agnostic and can be configured to support most documentation comment styles. 
 
 
 
@@ -104,6 +104,30 @@ comment-serializer will generate the following `json`:
 [TODO]
 
 Custom tag parsers can be passed to the `options` argument. See `lib/parsers.js` as an example.
+
+
+
+## Syntax Support ##
+
+While most documentation comment styles should be supported, there are a few rules around the syntax:
+
+  1. The `commentBegin`, `commentLinePrefix`, `commentEnd` and `tagPrefix` delimiter tokens are distinct from each other.
+  
+        /**       <- commentBegin
+         *        <- commentLinePrefix
+         * @tag   <- tagPrefix (the "@" symbol)
+         */       <- commentEnd
+  
+  2. Delimiters should not rely on a whitespace character. For example, the following style would not be supported:
+
+        /**
+          An unsupported style.
+          
+          @tag
+         */
+
+  3. 
+
 
 
 ## Test ##

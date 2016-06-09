@@ -11,8 +11,12 @@ var templateExpected = require( './lib/example-output' );
 describe( 'Custom Tokens', function() {
 
     [
-        [ '/**docs',    '*Line',    '**/',  '^' ],
-        [ '/**',        '*',        '*/',   '@' ]
+        [ '/**docs',    '*Line',    '**/',      '^' ],
+        [ '/**',        '*',        '*/',       '@' ],
+        [ '/*',         '**',       '*/',       '@' ],
+        [ '/*!',        '*',        '*/',       '@' ],
+        [ '//!',        '//',        '///',     '@' ],
+        [ '/********************************************//**', '*', '***********************************************/', '@' ]
 
     ].forEach( function( tokens ) {
 
@@ -31,7 +35,7 @@ describe( 'Custom Tokens', function() {
                 tokens: options
             })( source );
 
-            assert.deepEqual( expected, actual );
+            assert.deepEqual( actual, expected );
         });
 
     });

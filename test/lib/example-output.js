@@ -4,7 +4,7 @@ function factory( tokens ) {
 
     return [ { line: 6,
         preface: 'This is the general description.\n\n    This is a tabbed line (4 spaces)\n    This is a tabbed line (4 spaces)',
-        source: `\nThis is the general description.\n\n    This is a tabbed line (4 spaces)\n    This is a tabbed line (4 spaces)\n\n${tokens.tagPrefix}title-multi-word One ${tokens.tagPrefix} Element\n${tokens.tagPrefix}example The description of the example\n <div class="flash-block">\n     <div class="flash-block-content">\n         Success Message\n     </div>\n </div>\n${tokens.tagPrefix}modifier .flash-block-success JS added class that disables the block disappearing\n${tokens.tagPrefix}state :focus Special animated hover focus state\n${tokens.tagPrefix}state :hover Special animated hover focus state\n     `,
+        source: ` This is the general description.\n\n    This is a tabbed line (4 spaces)\n    This is a tabbed line (4 spaces)\n\n${tokens.tagPrefix}title-multi-word One ${tokens.tagPrefix} Element\n${tokens.tagPrefix}example The description of the example\n <div class="flash-block">\n     <div class="flash-block-content">\n         Success Message\n     </div>\n </div>\n${tokens.tagPrefix}modifier .flash-block-success JS added class that disables the block disappearing\n${tokens.tagPrefix}state :focus Special animated hover focus state\n${tokens.tagPrefix}state :hover Special animated hover focus state\n     `,
         context: '',
         tags:
          [ { tag: 'title-multi-word',
@@ -34,7 +34,7 @@ function factory( tokens ) {
              source: `${tokens.tagPrefix}state :hover Special animated hover focus state` } ] },
       { line: 24,
         preface: 'This is the general description.\n\n    This is a tabbed line (4 spaces)\n    This is a tabbed line (4 spaces)',
-        source: `\nThis is the general description.\n\n    This is a tabbed line (4 spaces)\n    This is a tabbed line (4 spaces)\n\n${tokens.tagPrefix}title One Element\n${tokens.tagPrefix}example The description of the example\n <div class="flash-block">\n     <div class="flash-block-content">\n         Success Message\n     </div>\n </div>\n${tokens.tagPrefix}modifier .flash-block-success JS added class that disables the block disappearing\n${tokens.tagPrefix}state :focus Special animated hover focus state\n${tokens.tagPrefix}state :hover Special animated hover focus state\n     `,
+        source: ` This is the general description.\n\n    This is a tabbed line (4 spaces)\n    This is a tabbed line (4 spaces)\n\n${tokens.tagPrefix}title One Element\n${tokens.tagPrefix}example The description of the example\n <div class="flash-block">\n     <div class="flash-block-content">\n         Success Message\n     </div>\n </div>\n${tokens.tagPrefix}modifier .flash-block-success JS added class that disables the block disappearing\n${tokens.tagPrefix}state :focus Special animated hover focus state\n${tokens.tagPrefix}state :hover Special animated hover focus state\n     `,
         context: 'var ryan = \'one\';',
         tags:
          [ { tag: 'title',
@@ -64,7 +64,7 @@ function factory( tokens ) {
              source: `${tokens.tagPrefix}state :hover Special animated hover focus state` } ] },
       { line: 43,
         preface: 'This is the general description.\n\nLorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n\n    This is a tabbed line (4 spaces)\n    This is a tabbed line (4 spaces)',
-        source: `\nThis is the general description.\n\nLorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n\n    This is a tabbed line (4 spaces)\n    This is a tabbed line (4 spaces)\n\n${tokens.tagPrefix}title Button\n\n${tokens.tagPrefix}modifier .cta primary coloring\n${tokens.tagPrefix}state :hover transition animation on hover\n\n${tokens.tagPrefix}example The example description\n <a class="btn" href="#">a.btn</a>\n\n${tokens.tagPrefix}example <button class="btn">button.btn</button>\n\n${tokens.tagPrefix}example <button class="btn cta">button.btn.cta</button>\n\n${tokens.tagPrefix}example\n <div class="btn-set">\n   <button class="btn cta">button.btn.cta</button>\n   <button class="btn">button.btn</button>\n </div>\n `,
+        source: ` This is the general description.\n\nLorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n\n    This is a tabbed line (4 spaces)\n    This is a tabbed line (4 spaces)\n\n${tokens.tagPrefix}title Button\n\n${tokens.tagPrefix}modifier .cta primary coloring\n${tokens.tagPrefix}state :hover transition animation on hover\n\n${tokens.tagPrefix}example The example description\n <a class="btn" href="#">a.btn</a>\n\n${tokens.tagPrefix}example <button class="btn">button.btn</button>\n\n${tokens.tagPrefix}example <button class="btn cta">button.btn.cta</button>\n\n${tokens.tagPrefix}example\n <div class="btn-set">\n   <button class="btn cta">button.btn.cta</button>\n   <button class="btn">button.btn</button>\n </div>\n `,
         context: 'var ryan = \'two\';',
         tags:
          [ { tag: 'title',
@@ -104,7 +104,7 @@ function factory( tokens ) {
              source: `${tokens.tagPrefix}example\n <div class="btn-set">\n   <button class="btn cta">button.btn.cta</button>\n   <button class="btn">button.btn</button>\n </div>` } ] },
       { line: 71,
         preface: 'This is the general description.',
-        source: `\nThis is the general description.\n\n${tokens.tagPrefix}title Three Element\n${tokens.tagPrefix}example\n <div class="flash-block">\n     <div class="flash-block-content">\n         Success Message\n     </div>\n </div>\n${tokens.tagPrefix}modifier .flash-block-success JS added class that disables the block disappearing\n${tokens.tagPrefix}state :focus Special animated hover focus state\n${tokens.tagPrefix}state :hover Special animated hover focus state\n `,
+        source: ` This is the general description.\n\n${tokens.tagPrefix}title Three Element\n${tokens.tagPrefix}example\n <div class="flash-block">\n     <div class="flash-block-content">\n         Success Message\n     </div>\n </div>\n${tokens.tagPrefix}modifier .flash-block-success JS added class that disables the block disappearing\n${tokens.tagPrefix}state :focus Special animated hover focus state\n${tokens.tagPrefix}state :hover Special animated hover focus state\n `,
         context: 'var ryan = \'three\';',
         tags:
          [ { tag: 'title',
@@ -134,8 +134,8 @@ function factory( tokens ) {
              source: `${tokens.tagPrefix}state :hover Special animated hover focus state` } ] },
       { line: 100,
         preface: 'This is the general description.',
-        source: `\nThis is the general description.\n\n${tokens.tagPrefix}title Four Element\n${tokens.tagPrefix}example\n <div class="flash-block">\n     <div class="flash-block-content">\n         Success Message\n     </div>\n </div>\n${tokens.tagPrefix}modifier .flash-block-success JS added class that disables the block disappearing\n${tokens.tagPrefix}state :focus Special animated hover focus state\n${tokens.tagPrefix}state :hover Special animated hover focus state\n `,
-        context: 'var ryan = \'four\';',
+        source: ` This is the general description.\n\n${tokens.tagPrefix}title Four Element\n${tokens.tagPrefix}example\n <div class="flash-block">\n     <div class="flash-block-content">\n         Success Message\n     </div>\n </div>\n${tokens.tagPrefix}modifier .flash-block-success JS added class that disables the block disappearing\n${tokens.tagPrefix}state :focus Special animated hover focus state\n${tokens.tagPrefix}state :hover Special animated hover focus state\n `,
+        context: `var ryan = 'four';\n/*\n    regular comment\n${tokens.commentEnd}`,
         tags:
          [ { tag: 'title',
              value: 'Four Element',

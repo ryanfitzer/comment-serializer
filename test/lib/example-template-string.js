@@ -114,6 +114,9 @@ ${'commentBegin'}
  ${'commentLinePrefix'} ${'tagPrefix'}state :hover Special animated hover focus state
  ${'commentEnd'}
 var ryan = 'four';
+/*
+    regular comment
+${'commentEnd'}
 
 
 `;

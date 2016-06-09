@@ -6,7 +6,7 @@ var templateComments = require( './test/lib/tagged-source-string' );
 
 // Configure comment delimiters
 var tokens = {
-    'commentBegin': '/**',
+    'commentBegin': '/*',
     'commentLinePrefix': '*',
     'commentEnd': '*/',
     'tagPrefix': '@'
@@ -23,17 +23,17 @@ var mySerializer = serializer({
 
 var result = mySerializer( src );
 
-var hasErrors = result.some( function ( comment ) {
-
-    return comment.tags.some( function ( tag ) {
-        return tag.error;
-    });
-});
-
-// Log the results real pretty like
-console.log( util.inspect( result, { depth: 10, colors: true } ) );
-
-if ( hasErrors ) {
-
-    console.log( '\nErrors were found in one or more tags!' );
-}
+// var hasErrors = result.some( function ( comment ) {
+//
+//     return comment.tags.some( function ( tag ) {
+//         return tag.error;
+//     });
+// });
+//
+// // Log the results real pretty like
+// // console.log( util.inspect( result, { depth: 10, colors: true } ) );
+//
+// if ( hasErrors ) {
+//
+//     console.log( '\nErrors were found in one or more tags!' );
+// }

@@ -22,12 +22,18 @@ function factory( config ) {
     var lastMatch = '\\$&';
 
     var safeTagPrefix = patterns.tagPrefix.replace( rCharacterClasses, lastMatch );
+    var safeCommentBegin = patterns.commentBegin.replace( rCharacterClasses, lastMatch );
     var safeCommentLinePrefix = patterns.commentLinePrefix.replace( rCharacterClasses, lastMatch );
+    var safeCommentEnd = patterns.commentEnd.replace( rCharacterClasses, lastMatch );
 
     var rLeadSpaces = /^[^\S\n]*/;
+    // var rTestCommentBegin = new RegExp( `${safeCommentBegin}\\s*\\n\\s*${safeCommentLinePrefix}` );
     var rCommentPreface = new RegExp( `.*${safeTagPrefix}(.+)\\s` );
-    var rCommentLinePrefix = new RegExp( `^(\\s)*${safeCommentLinePrefix}\\s?` );
+    // var rCommentLinePrefix = new RegExp( `^(\\s)*${safeCommentLinePrefix}\\s?` );
+    var rCommentLinePrefix = new RegExp( `^(\\s)*${safeCommentLinePrefix}` );
+    var rCommentLinePrefixGM = new RegExp( `^\\s*${safeCommentLinePrefix}`, 'gm' );
     var rTagName = new RegExp( `^${safeTagPrefix}([\\w-])+` );
+    var rComment = new RegExp( `(${safeCommentBegin}\\s*\\n\\s*${safeCommentLinePrefix}(?:.|\\n)*?${safeCommentEnd}\\s*\\n?)` );
     var parsers = options.parsers || {};
 
     /**
@@ -42,52 +48,161 @@ function factory( config ) {
      * @param sourceStr {String} The source to parse.
      * @return {Array}
      */
+    /*
     function explodeSections( sourceStr ) {
 
-        var sections = sourceStr.split( patterns.commentBegin );
-        var startLine = sections.shift();
+        var sections = sourceStr.split( rTestCommentBegin )
 
-        // Add an extra line to make up for the commentBegin line that get removed during split
-        var startLineNumber = getLinesLength( startLine ) + 1;
+        // Add an extra line to make up for the `commentBegin` line that gets removed during split
+        var startLineNumber = getLinesLength( sections.shift() ) + 1;
 
         return sections.reduce( function( collection, section ) {
 
-            var splitSection
-                , nextLine = startLineNumber
-                ;
+            var splitSection = section.split( patterns.commentEnd );
+            var nextLine = startLineNumber + section.split( '\n' ).length;
 
-            if ( section ) {
+            // Since multiple `commentEnd` tokens could be present in
+            // a section, we need to manually split section into two parts
+            section = [
+                splitSection[ 0 ],
+                splitSection.slice( 1 ).join( patterns.commentEnd )
+            ];
 
-                splitSection = section.split( patterns.commentEnd );
-                nextLine = startLineNumber + section.split( '\n' ).length;
+            section = section.map( function( block, sectionIndex ) {
 
-                // Since multiple `commentEnd` tokens could be present in
-                // a section, we need to manually split section into two parts
-                section = [
-                    splitSection[0],
-                    splitSection.slice( 1 ).join( patterns.commentEnd )
-                ];
+                block = block.split( '\n' ).map( function( line ) {
 
-                section = section.map( function( block ) {
-
-                    block = block.split( '\n' ).map( function( line ) {
-
+                    // Only strip `rCommentLinePrefix` if it's part of the comment block section
+                    if ( !sectionIndex ) {
                         return line.replace( rCommentLinePrefix, '' );
+                    }
 
-                    }).join( '\n' );
+                    return line;
 
-                    return block;
-                });
+                }).join( '\n' );
 
-                section.unshift( startLineNumber );
-                startLineNumber = nextLine - 1;
+                return block;
+            });
 
-                collection.push( section );
-            }
+            section.unshift( startLineNumber );
+            startLineNumber = nextLine;
+
+            collection.push( section );
 
             return collection;
 
         }, [] );
+    }
+    */
+    function explodeSections( sourceStr ) {
+
+        var sections = sourceStr.split( rComment );
+        var prevSectionLineLength = getLinesLength( sections.shift() );
+
+        return sections.reduce( function ( accum, section, index ) {
+
+            // Group each comment with its context
+            if ( index % 2 ) {
+
+                accum[ accum.length - 1 ].context = section;
+            }
+            else {
+                accum.push({
+                    line: prevSectionLineLength + 1,
+                    source: section.trim(),
+                });
+            }
+
+            prevSectionLineLength += getLinesLength( section );
+
+            return accum;
+        }, [] );
+
+        /*
+        return sections.reduce( function( collection, section ) {
+
+            var splitSection = section.split( patterns.commentEnd );
+            var nextLine = startLineNumber + section.split( '\n' ).length;
+
+            // Since multiple `commentEnd` tokens could be present in
+            // a section, we need to manually split section into two parts
+            section = [
+                splitSection[ 0 ],
+                splitSection.slice( 1 ).join( patterns.commentEnd )
+            ];
+
+            section = section.map( function( block, sectionIndex ) {
+
+                block = block.split( '\n' ).map( function( line ) {
+
+                    // Only strip `rCommentLinePrefix` if it's part of the comment block section
+                    if ( !sectionIndex ) {
+                        return line.replace( rCommentLinePrefix, '' );
+                    }
+
+                    return line;
+
+                }).join( '\n' );
+
+                return block;
+            });
+
+            section.unshift( startLineNumber );
+            startLineNumber = nextLine;
+
+            collection.push( section );
+
+            return collection;
+
+        }, [] );
+        */
+
+
+    }
+    
+    
+    function stripAndSerializeComment( lineNumber, sourceStr ) {
+
+        // Strip comment delimiter tokens
+        var stripped = sourceStr
+        .replace( patterns.commentBegin, '' )
+        .replace( patterns.commentEnd, '' )
+        .split( '\n' )
+        .map( line => line.replace( rCommentLinePrefix, '' ) );
+        
+        // Determine the number of preceeding spaces to strip
+        var prefixSpaces = stripped.reduce( function( accum, line ) {
+
+            if ( !accum.length && line.match( /\s*\S|\n/ ) ) {
+                accum = line.match( /\s*/ )[0];
+            }
+
+            return accum;
+        });
+
+        // Strip preceeding spaces
+        stripped = stripped.map( line => line.replace( prefixSpaces, '' ) );
+        
+        // Get line number for first tag
+        var firstTagLineNumber = stripped.reduce( function ( accum, line, index ) {
+
+            if ( isNaN( accum ) && line.match( rTagName ) ) {
+                accum = index;
+            }
+
+            return accum;
+
+        }, undefined );
+        
+        var comment = stripped.join( '\n' ).trim();
+        var tags = stripped.splice( firstTagLineNumber ).join( '\n' );
+        var preface = stripped.join( '\n' ).trim();
+
+        return {
+            comment: comment, 
+            preface: preface,
+            tags: serializeTags( lineNumber + firstTagLineNumber, tags )
+        }
     }
 
     /**
@@ -102,13 +217,15 @@ function factory( config ) {
      * @param section {String} The comment and its contextual source.
      * @return {Object}
      */
-    function serializeBlock( lineNumber, section ) {
+    /*
+    function serializeBlock( section ) {
 
-        var source = section[0]
-            , context = section[1].trim()
-            , preface = source.split( rCommentPreface )[0].trim()
+        var lineNumber = section[ 0 ]
+            , source = section[ 1 ]
+            , context = section[ 2 ].trim()
+            , preface = source.split( rCommentPreface )[ 0 ].trim()
             , tags = source.replace( preface, '' ).trim()
-            , startingIndex = lineNumber + getLinesLength( source.split( rCommentPreface )[0] )
+            , startingIndex = lineNumber + getLinesLength( source.split( rCommentPreface )[ 0 ] ) + 1
             ;
 
         return {
@@ -119,6 +236,7 @@ function factory( config ) {
             source: source
         };
     }
+    */
 
     /**
      * Takes a tags block and serializes it into individual tag objects.
@@ -187,8 +305,9 @@ function factory( config ) {
      */
     function getLinesLength( text ) {
 
-        // Remove trailing new line beforehand
-        return text.replace( /\n$/m, '' ).split( '\n' ).length;
+        var matches = text.match( /\n/g );
+
+        return matches ? matches.length : 0;
     }
 
     /**
@@ -196,13 +315,23 @@ function factory( config ) {
      */
     return function( src ) {
 
-        var sections = explodeSections( src );
+        return explodeSections( src ).map( function ( section ) {
+            
+            var result = stripAndSerializeComment( section.line, section.source );
+            
+            section.comment = result.comment;
+            section.preface = result.preface;
+            section.tags = result.tags;
+            
+            console.log( util.inspect( section, { depth: 5, colors: true } ) );
+            return section;
+        });
 
-        return sections.reduce( function( collection, section ) {
-
-            collection.push( serializeBlock( section.shift(), section ) );
-
-            return collection;
-        }, [] );
+        // return sections.reduce( function( collection, section ) {
+        //
+        //     collection.push( serializeBlock( section ) );
+        //
+        //     return collection;
+        // }, [] );
     };
 }
