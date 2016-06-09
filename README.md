@@ -109,15 +109,19 @@ Custom tag parsers can be passed to the `options` argument. See `lib/parsers.js`
 
 ## Syntax Support ##
 
+Comment delimiters:
+
+```
+/**       <- commentBegin
+ *        <- commentLinePrefix
+ * @tag   <- tagPrefix (the "@" symbol)
+ */       <- commentEnd
+ ```
+
 While most documentation comment styles should be supported, there are a few rules around the syntax:
 
   1. The `commentBegin`, `commentLinePrefix`, `commentEnd` and `tagPrefix` delimiter tokens are distinct from each other.
-  
-        /**       <- commentBegin
-         *        <- commentLinePrefix
-         * @tag   <- tagPrefix (the "@" symbol)
-         */       <- commentEnd
-  
+
   2. Delimiters should not rely on a whitespace character. For example, the following style would not be supported:
 
         /**
@@ -126,7 +130,7 @@ While most documentation comment styles should be supported, there are a few rul
           @tag
          */
 
-  3. 
+  3. ?????
 
 
 

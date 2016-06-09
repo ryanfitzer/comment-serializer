@@ -27,73 +27,21 @@ function factory( config ) {
     var safeCommentEnd = patterns.commentEnd.replace( rCharacterClasses, lastMatch );
 
     var rLeadSpaces = /^[^\S\n]*/;
-    // var rTestCommentBegin = new RegExp( `${safeCommentBegin}\\s*\\n\\s*${safeCommentLinePrefix}` );
-    var rCommentPreface = new RegExp( `.*${safeTagPrefix}(.+)\\s` );
-    // var rCommentLinePrefix = new RegExp( `^(\\s)*${safeCommentLinePrefix}\\s?` );
-    var rCommentLinePrefix = new RegExp( `^(\\s)*${safeCommentLinePrefix}` );
-    var rCommentLinePrefixGM = new RegExp( `^\\s*${safeCommentLinePrefix}`, 'gm' );
-    var rTagName = new RegExp( `^${safeTagPrefix}([\\w-])+` );
     var rComment = new RegExp( `(${safeCommentBegin}\\s*\\n\\s*${safeCommentLinePrefix}(?:.|\\n)*?${safeCommentEnd}\\s*\\n?)` );
+    var rCommentLinePrefix = new RegExp( `^(\\s)*${safeCommentLinePrefix}` );
+    var rTagName = new RegExp( `^${safeTagPrefix}([\\w-])+` );
     var parsers = options.parsers || {};
 
     /**
-     * Splits a string into an array of sections.
-     * The array has 3 parts:
-     *  - starting line number
-     *  - comment block stripped of `commentBegin`, `commentEnd` and
-     *    `commentLinePrefix` tokens, including leading spaces between
-     *    the `commentLinePrefix` and the `tagPrefix` tokens.
-     *  - all source between the `commentEnd` token and next `commentBegin` token.
+     * Splits a string into array of sections. Each section 3 properties:
+     * 
+     *  - line: starting line number
+     *  - source: the comment source
+     *  - context: source between the `commentEnd` token and next `commentBegin` token (or EOF).
      *
      * @param sourceStr {String} The source to parse.
      * @return {Array}
      */
-    /*
-    function explodeSections( sourceStr ) {
-
-        var sections = sourceStr.split( rTestCommentBegin )
-
-        // Add an extra line to make up for the `commentBegin` line that gets removed during split
-        var startLineNumber = getLinesLength( sections.shift() ) + 1;
-
-        return sections.reduce( function( collection, section ) {
-
-            var splitSection = section.split( patterns.commentEnd );
-            var nextLine = startLineNumber + section.split( '\n' ).length;
-
-            // Since multiple `commentEnd` tokens could be present in
-            // a section, we need to manually split section into two parts
-            section = [
-                splitSection[ 0 ],
-                splitSection.slice( 1 ).join( patterns.commentEnd )
-            ];
-
-            section = section.map( function( block, sectionIndex ) {
-
-                block = block.split( '\n' ).map( function( line ) {
-
-                    // Only strip `rCommentLinePrefix` if it's part of the comment block section
-                    if ( !sectionIndex ) {
-                        return line.replace( rCommentLinePrefix, '' );
-                    }
-
-                    return line;
-
-                }).join( '\n' );
-
-                return block;
-            });
-
-            section.unshift( startLineNumber );
-            startLineNumber = nextLine;
-
-            collection.push( section );
-
-            return collection;
-
-        }, [] );
-    }
-    */
     function explodeSections( sourceStr ) {
 
         var sections = sourceStr.split( rComment );
@@ -116,51 +64,21 @@ function factory( config ) {
             prevSectionLineLength += getLinesLength( section );
 
             return accum;
+            
         }, [] );
-
-        /*
-        return sections.reduce( function( collection, section ) {
-
-            var splitSection = section.split( patterns.commentEnd );
-            var nextLine = startLineNumber + section.split( '\n' ).length;
-
-            // Since multiple `commentEnd` tokens could be present in
-            // a section, we need to manually split section into two parts
-            section = [
-                splitSection[ 0 ],
-                splitSection.slice( 1 ).join( patterns.commentEnd )
-            ];
-
-            section = section.map( function( block, sectionIndex ) {
-
-                block = block.split( '\n' ).map( function( line ) {
-
-                    // Only strip `rCommentLinePrefix` if it's part of the comment block section
-                    if ( !sectionIndex ) {
-                        return line.replace( rCommentLinePrefix, '' );
-                    }
-
-                    return line;
-
-                }).join( '\n' );
-
-                return block;
-            });
-
-            section.unshift( startLineNumber );
-            startLineNumber = nextLine;
-
-            collection.push( section );
-
-            return collection;
-
-        }, [] );
-        */
-
-
     }
     
-    
+    /**
+     * Strip and serialize a comment into its various parts.
+     * 
+     *  - comment: the comment block stripped delimiters and leading spaces.
+     *  - preface
+     *  - tags
+     *
+     * @param lineNumber {Number} The comment's starting line number.
+     * @param section {String} The comment's source.
+     * @return {Object}
+     */
     function stripAndSerializeComment( lineNumber, sourceStr ) {
 
         // Strip comment delimiter tokens
@@ -170,7 +88,7 @@ function factory( config ) {
         .split( '\n' )
         .map( line => line.replace( rCommentLinePrefix, '' ) );
         
-        // Determine the number of preceeding spaces to strip
+        // Determine the number of leading spaces to strip
         var prefixSpaces = stripped.reduce( function( accum, line ) {
 
             if ( !accum.length && line.match( /\s*\S|\n/ ) ) {
@@ -180,7 +98,7 @@ function factory( config ) {
             return accum;
         });
 
-        // Strip preceeding spaces
+        // Strip leading spaces
         stripped = stripped.map( line => line.replace( prefixSpaces, '' ) );
         
         // Get line number for first tag
@@ -204,39 +122,6 @@ function factory( config ) {
             tags: serializeTags( lineNumber + firstTagLineNumber, tags )
         }
     }
-
-    /**
-     * Serialize a section into its various parts.
-     *  - line
-     *  - preface
-     *  - tags
-     *  - context
-     *  - source
-     *
-     * @param lineNumber {Number} The comment's starting line number.
-     * @param section {String} The comment and its contextual source.
-     * @return {Object}
-     */
-    /*
-    function serializeBlock( section ) {
-
-        var lineNumber = section[ 0 ]
-            , source = section[ 1 ]
-            , context = section[ 2 ].trim()
-            , preface = source.split( rCommentPreface )[ 0 ].trim()
-            , tags = source.replace( preface, '' ).trim()
-            , startingIndex = lineNumber + getLinesLength( source.split( rCommentPreface )[ 0 ] ) + 1
-            ;
-
-        return {
-            line: lineNumber,
-            preface: preface,
-            tags: serializeTags( startingIndex, tags ),
-            context: context,
-            source: source
-        };
-    }
-    */
 
     /**
      * Takes a tags block and serializes it into individual tag objects.
@@ -263,7 +148,6 @@ function factory( config ) {
         .map( function( block ) {
 
             var trimmed = block.trim()
-                // , tag = trimmed.match( rTagName )[0]
                 , tag = block.match( rTagName )[0]
                 ;
 
@@ -287,7 +171,6 @@ function factory( config ) {
 
                 try {
 
-                    // Tag = Object.assign( tag, parser( tag.value ) );
                     tag.valueParsed = parser( tag.value );
                 }
                 catch ( err ) {
@@ -301,7 +184,10 @@ function factory( config ) {
     }
 
     /**
-     *
+     * Get the number of newlines in a block of text.
+     * 
+     * @param text {String}
+     * @return {Number}
      */
     function getLinesLength( text ) {
 
@@ -310,9 +196,6 @@ function factory( config ) {
         return matches ? matches.length : 0;
     }
 
-    /**
-     *
-     */
     return function( src ) {
 
         return explodeSections( src ).map( function ( section ) {
@@ -326,12 +209,5 @@ function factory( config ) {
             console.log( util.inspect( section, { depth: 5, colors: true } ) );
             return section;
         });
-
-        // return sections.reduce( function( collection, section ) {
-        //
-        //     collection.push( serializeBlock( section ) );
-        //
-        //     return collection;
-        // }, [] );
     };
 }
