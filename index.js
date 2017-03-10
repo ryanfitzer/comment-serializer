@@ -34,7 +34,7 @@ function factory( config ) {
 
     /**
      * Splits a string into array of sections. Each section 3 properties:
-     * 
+     *
      *  - line: starting line number
      *  - source: the comment source
      *  - context: source between the `commentEnd` token and next `commentBegin` token (or EOF).
@@ -64,13 +64,13 @@ function factory( config ) {
             prevSectionLineLength += getLinesLength( section );
 
             return accum;
-            
+
         }, [] );
     }
-    
+
     /**
      * Strip and serialize a comment into its various parts.
-     * 
+     *
      *  - comment: the comment block stripped delimiters and leading spaces.
      *  - preface
      *  - tags
@@ -87,7 +87,7 @@ function factory( config ) {
         .replace( patterns.commentEnd, '' )
         .split( '\n' )
         .map( line => line.replace( rCommentLinePrefix, '' ) );
-        
+
         // Determine the number of leading spaces to strip
         var prefixSpaces = stripped.reduce( function( accum, line ) {
 
@@ -100,7 +100,7 @@ function factory( config ) {
 
         // Strip leading spaces
         stripped = stripped.map( line => line.replace( prefixSpaces, '' ) );
-        
+
         // Get line number for first tag
         var firstTagLineNumber = stripped.reduce( function ( accum, line, index ) {
 
@@ -111,13 +111,13 @@ function factory( config ) {
             return accum;
 
         }, undefined );
-        
+
         var comment = stripped.join( '\n' ).trim();
         var tags = stripped.splice( firstTagLineNumber ).join( '\n' );
         var preface = stripped.join( '\n' ).trim();
 
         return {
-            comment: comment, 
+            comment: comment,
             preface: preface,
             tags: serializeTags( lineNumber + firstTagLineNumber, tags )
         }
@@ -185,7 +185,7 @@ function factory( config ) {
 
     /**
      * Get the number of newlines in a block of text.
-     * 
+     *
      * @param text {String}
      * @return {Number}
      */
@@ -199,14 +199,14 @@ function factory( config ) {
     return function( src ) {
 
         return explodeSections( src ).map( function ( section ) {
-            
+
             var result = stripAndSerializeComment( section.line, section.source );
-            
+
             section.comment = result.comment;
             section.preface = result.preface;
             section.tags = result.tags;
-            
-            console.log( util.inspect( section, { depth: 5, colors: true } ) );
+
+            // console.log( util.inspect( section, { depth: 5, colors: true } ) );
             return section;
         });
     };
