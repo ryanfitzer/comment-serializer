@@ -13,8 +13,7 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha",
-    "jscs": "jscs --verbose --fix $npm_package_config_jscs_files"
+    "test": "./node_modules/mocha/bin/mocha"
   },
   "config": {
     "jscs": {
@@ -33,6 +32,7 @@
     "documentation block"
   ],
   "devDependencies": {
+    "eslint": "^3.17.1",
     "mocha": "^2.4.5"
   }
 }
