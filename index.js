@@ -1,4 +1,3 @@
-var util = require( 'util' );
 var tagParsers = require( './lib/parsers' );
 
 module.exports = factory;
@@ -39,8 +38,8 @@ function factory( config ) {
      *  - source: the comment source
      *  - context: source between the `commentEnd` token and next `commentBegin` token (or EOF).
      *
-     * @param sourceStr {String} The source to parse.
-     * @return {Array}
+     * @param {String} sourceStr The source to parse.
+     * @returns {Array}
      */
     function explodeSections( sourceStr ) {
 
@@ -57,7 +56,7 @@ function factory( config ) {
             else {
                 accum.push({
                     line: prevSectionLineLength + 1,
-                    source: section.trim(),
+                    source: section.trim()
                 });
             }
 
@@ -75,9 +74,9 @@ function factory( config ) {
      *  - preface
      *  - tags
      *
-     * @param lineNumber {Number} The comment's starting line number.
-     * @param section {String} The comment's source.
-     * @return {Object}
+     * @param {Number} lineNumber The comment's starting line number.
+     * @param {String} sourceStr The comment's source.
+     * @returns {Object}
      */
     function stripAndSerializeComment( lineNumber, sourceStr ) {
 
@@ -89,7 +88,7 @@ function factory( config ) {
         .map( line => line.replace( rCommentLinePrefix, '' ) );
 
         // Determine the number of leading spaces to strip
-        var prefixSpaces = stripped.reduce( function( accum, line ) {
+        var prefixSpaces = stripped.reduce( function ( accum, line ) {
 
             if ( !accum.length && line.match( /\s*\S|\n/ ) ) {
                 accum = line.match( /\s*/ )[0];
@@ -120,15 +119,15 @@ function factory( config ) {
             comment: comment,
             preface: preface,
             tags: serializeTags( lineNumber + firstTagLineNumber, tags )
-        }
+        };
     }
 
     /**
      * Takes a tags block and serializes it into individual tag objects.
      *
-     * @param lineNumber {Number} The tags block starting line number.
-     * @param tags {String} The tags block.
-     * @return {Array}
+     * @param {Number} lineNumber The tags block starting line number.
+     * @param{String}  tags The tags block.
+     * @returns {Array}
      */
     function serializeTags( lineNumber, tags ) {
 
@@ -145,10 +144,11 @@ function factory( config ) {
             return acc;
 
         }, [] )
-        .map( function( block ) {
+        .map( function ( block ) {
 
             var trimmed = block.trim()
                 , tag = block.match( rTagName )[0]
+
                 ;
 
             var result = {
@@ -163,7 +163,7 @@ function factory( config ) {
 
             return result;
         })
-        .map( function( tag ) {
+        .map( function ( tag ) {
 
             var parser = parsers[ tag.tag ];
 
@@ -186,8 +186,8 @@ function factory( config ) {
     /**
      * Get the number of newlines in a block of text.
      *
-     * @param text {String}
-     * @return {Number}
+     * @param {String} text Text to use.
+     * @returns {Number}
      */
     function getLinesLength( text ) {
 
@@ -196,7 +196,7 @@ function factory( config ) {
         return matches ? matches.length : 0;
     }
 
-    return function( src ) {
+    return function ( src ) {
 
         return explodeSections( src ).map( function ( section ) {
 
