@@ -1,13 +1,13 @@
-var tagParsers = require( './lib/parsers' );
+const tagParsers = require( './lib/parsers' );
 
 module.exports = factory;
 module.exports.parsers = tagParsers;
 
 function factory( config ) {
 
-    var options = config || {};
+    const options = config || {};
 
-    var patterns = Object.assign({
+    const patterns = Object.assign({
         commentBegin: '/**',
         commentEnd: '*/',
         commentLinePrefix: '*',
@@ -15,30 +15,21 @@ function factory( config ) {
     }, options.tokens );
 
     // Example: https://github.com/VerbalExpressions/JSVerbalExpressions/blob/master/VerbalExpressions.js#L63
-    var rCharacterClasses = /([\].|*?+(){}^$\\:=[])/g;
+    const rCharacterClasses = /([\].|*?+(){}^$\\:=[])/g;
 
     // Last match, URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/lastMatch
-    var lastMatch = '\\$&';
+    const lastMatch = '\\$&';
 
-    var safeTagPrefix = patterns.tagPrefix.replace( rCharacterClasses, lastMatch );
-    var safeCommentBegin = patterns.commentBegin.replace( rCharacterClasses, lastMatch );
-    var safeCommentLinePrefix = patterns.commentLinePrefix.replace( rCharacterClasses, lastMatch );
-    var safeCommentEnd = patterns.commentEnd.replace( rCharacterClasses, lastMatch );
+    const safeTagPrefix = patterns.tagPrefix.replace( rCharacterClasses, lastMatch );
+    const safeCommentBegin = patterns.commentBegin.replace( rCharacterClasses, lastMatch );
+    const safeCommentLinePrefix = patterns.commentLinePrefix.replace( rCharacterClasses, lastMatch );
+    const safeCommentEnd = patterns.commentEnd.replace( rCharacterClasses, lastMatch );
 
-    var rLeadSpaces = /^[^\S\n]*/;
-    var rComment = new RegExp( `(${safeCommentBegin}\\s*\\n\\s*${safeCommentLinePrefix}(?:.|\\n)*?${safeCommentEnd}\\s*\\n?)` );
-    var rCommentLinePrefix = new RegExp( `^(\\s)*${safeCommentLinePrefix}` );
-    var rTagName = new RegExp( `^${safeTagPrefix}([\\w-])+` );
-    var parsers = options.parsers || {};
-
-    if ( !String.prototype.trim ) {
-
-        String.prototype.trimRight = function () {
-
-            return this.replace( /[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/, '' );
-
-        };
-    }
+    const rLeadSpaces = /^[^\S\n]*/;
+    const rComment = new RegExp( `(${safeCommentBegin}\\s*\\n\\s*${safeCommentLinePrefix}(?:.|\\n)*?${safeCommentEnd}\\s*\\n?)` );
+    const rCommentLinePrefix = new RegExp( `^(\\s)*${safeCommentLinePrefix}` );
+    const rTagName = new RegExp( `^${safeTagPrefix}([\\w-])+` );
+    const parsers = options.parsers || {};
 
     /**
      * Splits a string into array of sections. Each section 3 properties:
@@ -52,8 +43,8 @@ function factory( config ) {
      */
     function explodeSections( sourceStr ) {
 
-        var sections = sourceStr.split( rComment );
-        var prevSectionLineLength = getLinesLength( sections.shift() );
+        const sections = sourceStr.split( rComment );
+        let prevSectionLineLength = getLinesLength( sections.shift() );
 
         return sections.reduce( function ( accum, section, index ) {
 
@@ -90,14 +81,14 @@ function factory( config ) {
     function stripAndSerializeComment( lineNumber, sourceStr ) {
 
         // Strip comment delimiter tokens
-        var stripped = sourceStr
+        let stripped = sourceStr
         .replace( patterns.commentBegin, '' )
         .replace( patterns.commentEnd, '' )
         .split( '\n' )
         .map( line => line.replace( rCommentLinePrefix, '' ) );
 
         // Determine the number of leading spaces to strip
-        var prefixSpaces = stripped.reduce( function ( accum, line ) {
+        const prefixSpaces = stripped.reduce( function ( accum, line ) {
 
             if ( !accum.length && line.match( /\s*\S|\n/ ) ) {
                 accum = line.match( /\s*/ )[0];
@@ -110,7 +101,7 @@ function factory( config ) {
         stripped = stripped.map( line => line.replace( prefixSpaces, '' ) );
 
         // Get line number for first tag
-        var firstTagLineNumber = stripped.reduce( function ( accum, line, index ) {
+        const firstTagLineNumber = stripped.reduce( function ( accum, line, index ) {
 
             if ( isNaN( accum ) && line.match( rTagName ) ) {
                 accum = index;
@@ -120,13 +111,13 @@ function factory( config ) {
 
         }, undefined );
 
-        var comment = stripped.join( '\n' ).trim();
-        var tags = stripped.splice( firstTagLineNumber ).join( '\n' );
-        var preface = stripped.join( '\n' ).trim();
+        const comment = stripped.join( '\n' ).trim();
+        const tags = stripped.splice( firstTagLineNumber ).join( '\n' );
+        const preface = stripped.join( '\n' ).trim();
 
         return {
+            preface,
             content: comment,
-            preface: preface,
             tags: serializeTags( lineNumber + firstTagLineNumber, tags )
         };
     }
@@ -155,12 +146,10 @@ function factory( config ) {
         }, [] )
         .map( function ( block ) {
 
-            var trimmed = block.trim()
-                , tag = block.match( rTagName )[0]
+            const trimmed = block.trim();
+            const tag = block.match( rTagName )[0];
 
-                ;
-
-            var result = {
+            const result = {
                 line: lineNumber,
                 tag: tag.replace( patterns.tagPrefix, '' ),
                 value: trimmed.replace( tag, '' ).replace( rLeadSpaces, '' ),
@@ -174,7 +163,7 @@ function factory( config ) {
         })
         .map( function ( tag ) {
 
-            var parser = parsers[ tag.tag ];
+            const parser = parsers[ tag.tag ];
 
             if ( parser ) {
 
@@ -200,7 +189,7 @@ function factory( config ) {
      */
     function getLinesLength( text ) {
 
-        var matches = text.match( /\n/g );
+        const matches = text.match( /\n/g );
 
         return matches ? matches.length : 0;
     }
@@ -209,7 +198,7 @@ function factory( config ) {
 
         return explodeSections( src ).map( function ( section ) {
 
-            var result = stripAndSerializeComment( section.line, section.source );
+            const result = stripAndSerializeComment( section.line, section.source );
 
             section.content = result.content;
             section.preface = result.preface;
