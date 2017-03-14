@@ -1,3 +1,5 @@
+'use strict';
+
 const tagParsers = require( './lib/parsers' );
 
 module.exports = factory;
