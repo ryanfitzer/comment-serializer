@@ -1,14 +1,11 @@
-// var util = require( 'util' );
-// var path = require( 'path' );
 var assert = require( 'assert' );
 
-// var fsp = require( '../lib/fsp' );
 var serializer = require( '../index' );
 var templateComments = require( './lib/tagged-source-string' );
 var templateExpected = require( './lib/example-output' );
 
 
-describe( 'Custom Tokens', function() {
+describe( 'Custom Tokens', function () {
 
     [
         [ '/**docs',    '*Line',    '**/',      '^' ],
@@ -18,9 +15,9 @@ describe( 'Custom Tokens', function() {
         [ '//!',        '//',        '///',     '@' ],
         [ '/********************************************//**', '*', '***********************************************/', '@' ]
 
-    ].forEach( function( tokens ) {
+    ].forEach( function ( tokens ) {
 
-        it( `should replace the default tokens with: ${ tokens.join( ', ' ) }`, function() {
+        it( `should replace the default tokens with: ${ tokens.join( ', ' ) }`, function () {
 
             var options = {
                 'commentBegin': tokens[0],

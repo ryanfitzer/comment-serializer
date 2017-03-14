@@ -15,11 +15,6 @@
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha"
   },
-  "config": {
-    "jscs": {
-      "files": "index.js lib/*.js test/*.js"
-    }
-  },
   "keywords": [
     "comment",
     "comments",

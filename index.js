@@ -31,6 +31,15 @@ function factory( config ) {
     var rTagName = new RegExp( `^${safeTagPrefix}([\\w-])+` );
     var parsers = options.parsers || {};
 
+    if ( !String.prototype.trim ) {
+
+        String.prototype.trimRight = function () {
+
+            return this.replace( /[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/, '' );
+
+        };
+    }
+
     /**
      * Splits a string into array of sections. Each section 3 properties:
      *
@@ -51,7 +60,7 @@ function factory( config ) {
             // Group each comment with its context
             if ( index % 2 ) {
 
-                accum[ accum.length - 1 ].context = section;
+                accum[ accum.length - 1 ].context = section.trimRight();
             }
             else {
                 accum.push({
@@ -116,7 +125,7 @@ function factory( config ) {
         var preface = stripped.join( '\n' ).trim();
 
         return {
-            comment: comment,
+            content: comment,
             preface: preface,
             tags: serializeTags( lineNumber + firstTagLineNumber, tags )
         };
@@ -126,7 +135,7 @@ function factory( config ) {
      * Takes a tags block and serializes it into individual tag objects.
      *
      * @param {Number} lineNumber The tags block starting line number.
-     * @param{String}  tags The tags block.
+     * @param {String} tags The tags block.
      * @returns {Array}
      */
     function serializeTags( lineNumber, tags ) {
@@ -202,7 +211,7 @@ function factory( config ) {
 
             var result = stripAndSerializeComment( section.line, section.source );
 
-            section.comment = result.comment;
+            section.content = result.content;
             section.preface = result.preface;
             section.tags = result.tags;
 
