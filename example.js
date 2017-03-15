@@ -38,4 +38,4 @@ const mySerializer = serializer({
 
 const result = mySerializer( src );
 
-console.log( result );
+// console.log( result );

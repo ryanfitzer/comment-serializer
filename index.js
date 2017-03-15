@@ -14,8 +14,6 @@ function factory( config ) {
         tagPrefix: '@'
     }, options.tokens );
 
-    console.log( 'patterns', patterns );
-
     // Example: https://github.com/VerbalExpressions/JSVerbalExpressions/blob/master/VerbalExpressions.js#L63
     const rCharacterClasses = /([\].|*?+(){}^$\\:=[])/g;
 
