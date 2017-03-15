@@ -29,5 +29,6 @@
   "devDependencies": {
     "eslint": "^3.17.1",
     "mocha": "^2.4.5"
-  }
+  },
+  "runkitExampleFilename": "example.js"
 }

@@ -1,9 +1,7 @@
 'use strict';
 
-const tagParsers = require( './lib/parsers' );
-
 module.exports = factory;
-module.exports.parsers = tagParsers;
+module.exports.parsers = require( './lib/custom-parsers' );
 
 function factory( config ) {
 
@@ -15,6 +13,8 @@ function factory( config ) {
         commentLinePrefix: '*',
         tagPrefix: '@'
     }, options.tokens );
+
+    console.log( 'patterns', patterns );
 
     // Example: https://github.com/VerbalExpressions/JSVerbalExpressions/blob/master/VerbalExpressions.js#L63
     const rCharacterClasses = /([\].|*?+(){}^$\\:=[])/g;

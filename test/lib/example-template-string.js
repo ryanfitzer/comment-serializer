@@ -1,4 +1,4 @@
-var compile = require( '../../lib/tagged-template-string' );
+const compile = require( './tagged-template-string' );
 
 module.exports = compile`// Just some dumb code
 for (var i = 0; i < 10; i++) {

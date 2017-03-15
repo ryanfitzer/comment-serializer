@@ -1,9 +1,6 @@
-var util = require( 'util' );
+const template = require( './example-template-string' );
 
-var template = require( './example-template-string' );
-
-module.exports = factory;
-function factory( options ) {
+module.exports = options => {
 
     return template( options );
-}
+};

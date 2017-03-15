@@ -1,109 +1,187 @@
 # Comment Serializer #
 
-[![NPM version](https://badge.fury.io/js/comment-serializer.svg)](https://www.npmjs.com/package/comment-serializer)
+[![NPM version](https://badge.fury.io/js/comment-serializer.svg)](https://www.npmjs.com/package/comment-serializer) [![Try on RunKit](https://badge.runkitcdn.com/comment-serializer.svg)](https://runkit.com/npm/comment-serializer)
 
-Comment Serializer parses a source string for documentation comments and returns a serialized object. It is syntax agnostic and can be configured to support most documentation comment styles. 
+Comment Serializer parses a source string for documentation comment blocks and returns a serialized object. It is syntax agnostic and can be configured to support most documentation comment styles. 
 
 
 
 ## Usage ##
 
-[TODO]
+```js
+const serializer = require( 'comment-serializer' );
 
-Run it directly to see a demo that logs the results to the console:
+const mySerializer = serializer( { /* options */ } );
+
+const source = `
+/**
+ * This is the general description.
+ *
+ * @title Button
+ *
+ * @markup <button class="btn">My Button</button>
+ */
+.btn {
+  color: red;
+}`;
+
+const result = mySerializer( source );
 
 ```
-$ node runme
-```
+
+Try out a [more robust example on RunKit](https://runkit.com/npm/comment-serializer).
 
 
 
 ## Options ##
 
-[TODO]
 
-```js
-{
-    // These are the default delimiters
-    tokens: {
-        'commentBegin': '/**',
-        'commentLinePrefix': '*',
-        'commentEnd': '*/',
-        'tagPrefix': '@'
-    },
-    // These are example custom parsers from "lib/parsers.js"
-    parsers: serializer.parsers()
-}
+### `options.parsers` ###
+
+  - Required: No
+  - Type: `Object`
+
+Customize the handling of tags. An object where the tag name is the key and the value is a function. The function receives the tag's value and returns the parsed value.
+
+Here's a simple example:
+
+Source to parse:
+
 ```
-
-
-
-## What you Get Back ##
-
-[TODO]
-
-```js
-[
-    {
-        line: 0, // Line number on which comment block starts
-        preface: '', // Text before first tag
-        source: '', // Full source of the comment block
-        context: '', // Code bounded by end of current comment block and start of next (or EOF)
-        tags: [
-            {
-                tag: '', // Name of the tag
-                value: '', // Content after tag name
-                line: 0, // Line number on which tag starts
-                source: '' // Full source of the tag block
-                error: {} // Present if any error was thrown
-                valueParsed: [
-                    // return value from custom tag parser
-                ]
-            },
-            {...},
-            {...}
-        ]
-    }
-]
-```
-
-For example: with the following example content containing a comment block:
-
-```js
 /**
- * This is the general preface.
- *
- * @title This is a description.
+ * @mySpecialTag This value is special!
  */
-var bar = 'foo';
 ```
 
-comment-serializer will generate the following `json`:
+The custom parser:
 
 ```js
-[
-    {
-        line: 1,
-        preface: 'This is the general preface.',
-        source: '\nThis is the general preface.\n\n@title This is a description.\n ',
-        context: 'var bar = \'foo\';',
-        tags: [{
-            line: 4,
-            tag: 'title',
-            value: 'This is a description.',
-            valueParsed: [],
-            source: '@title This is a description.'
-        }
+const mySerializer = serializer({
+  parsers: {
+    mySpecialTag: function( value ) {
+      return value.toUpperCase();
     }
-]
+  }
+});
 ```
 
+Result:
 
-## Custom Tag Parsers ##
+```js
+[{
+  line: 1,
+  source: '/**\n * @mySpecialTag This value is special!\n */',
+  context: '',
+  content: '@mySpecialTag This value is special!',
+  preface: '',
+  tags: [{
+    line: 2,
+    tag: 'mySpecialTag',
+    value: 'This value is special!',
+    valueParsed: 'THIS VALUE IS SPECIAL!',
+    source: '@mySpecialTag This value is special!'
+  }]
+}]
 
-[TODO]
+```
 
-Custom tag parsers can be passed to the `options` argument. See `lib/parsers.js` as an example.
+A more advanced example:
+
+```
+/**
+ * @mySpecialTag
+ *  - item-1
+ *  - item-2
+ *  - item-3
+ */
+```
+
+```js
+const mySerializer = serializer({
+  parsers: {
+    'mySpecialTag': function( value ) {
+    
+      const match = value.match( /\s*[-*]\s+[\w-_]*/g );
+      
+      return [
+        {
+          type: 'items',
+          value: match.map( function ( item ) {
+            return item.trim().replace( /[-*]\s/, '' );
+          })
+        }
+      ];
+    }
+  }
+});
+```
+
+Result:
+
+```js
+[{
+  line: 1,
+  source: '/**\n * @mySpecialTag\n *  - item-1\n *  - item-2\n *  - item-3\n */',
+  context: '',
+  content: '@mySpecialTag\n - item-1\n - item-2\n - item-3',
+  preface: '',
+  tags: [{
+    line: 2,
+    tag: 'mySpecialTag',
+    value: '\n - item-1\n - item-2\n - item-3',
+    valueParsed: [{
+      type: 'items',
+      value: ['item-1', 'item-2', 'item-3']
+    }],
+    source: '@mySpecialTag\n - item-1\n - item-2\n - item-3'
+  }]
+}]
+```
+
+You can find more examples of custom parsers in [`./lib/custom-parsers.js`](comment-serializer/lib/custom-parsers.js)
+
+### `options.tokens` ###
+
+  - Required: No
+  - Type: `Object`
+
+Customize the comment delimiters.
+
+
+### `options.tokens.commentBegin` ###
+
+  - Required: No
+  - Type: `String`
+  - Default: `'/**'`
+
+The delimiter marking the beginning of a comment block.
+
+
+### `options.tokens.commentLinePrefix` ###
+
+  - Required: No
+  - Type: `String`
+  - Default: `'*'`
+
+The delimiter marking a new line in the body of a comment block.
+
+
+### `options.tokens.tagPrefix` ###
+
+  - Required: No
+  - Type: `String`
+  - Default: `'@'`
+
+The delimiter marking the start of a tag in the comment body.
+
+
+### `options.tokens.commentEnd` ###
+
+  - Required: No
+  - Type: `String`
+  - Default: `'*/'`
+
+The delimiter marking the end of a comment block.
 
 
 
@@ -111,7 +189,7 @@ Custom tag parsers can be passed to the `options` argument. See `lib/parsers.js`
 
 Comment delimiters:
 
-```
+```text
 /**       <- commentBegin
  *        <- commentLinePrefix
  * @tag   <- tagPrefix (the "@" symbol)
@@ -120,24 +198,15 @@ Comment delimiters:
 
 While most documentation comment styles should be supported, there are a few rules around the syntax:
 
-  1. The `commentBegin`, `commentLinePrefix`, `commentEnd` and `tagPrefix` delimiter tokens are distinct from each other.
+  1. The `commentBegin`, `commentLinePrefix`, `commentEnd` and `tagPrefix` delimiter tokens must be distinct from each other.
 
-  2. Delimiters should not rely on a whitespace character. For example, the following style would not be supported:
+  2. Delimiters should not rely on a whitespace character as a delimiter. For example, the following style would not be supported:
 
-        /**
-          An unsupported style.
-          
-          @tag
-         */
+  ```text
+  /**
+    An unsupported style.
+    
+    @tag
+   */
+  ```
 
-  3. ?????
-
-
-
-## Test ##
-
-[TODO]
-
-```
-$ npm test
-```
