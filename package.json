@@ -1,6 +1,6 @@
 {
   "name": "comment-serializer",
-  "version": "0.2.3",
+  "version": "1.0.0",
   "author": "Ryan Fitzer",
   "description": "A serializer of source code comments.",
   "license": "MIT",
