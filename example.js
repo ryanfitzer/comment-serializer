@@ -36,6 +36,6 @@ const mySerializer = serializer({
     parsers: serializer.parsers()
 });
 
-const result = mySerializer( src );
+mySerializer( src );
 
-// console.log( result );
+// console.log( mySerializer( src ) );
