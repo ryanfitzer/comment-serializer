@@ -106,9 +106,7 @@ const mySerializer = serializer({
       return [
         {
           type: 'items',
-          value: match.map( function ( item ) {
-            return item.trim().replace( /[-*]\s/, '' );
-          })
+          value: match.map( item => item.trim().replace( /[-*]\s/, '' ) )
         }
       ];
     }
@@ -138,7 +136,7 @@ Result:
 }]
 ```
 
-You can find more examples of custom parsers in [`./lib/custom-parsers.js`](comment-serializer/lib/custom-parsers.js)
+You can find more examples of custom parsers in [`./lib/custom-parsers.js`](lib/custom-parsers.js)
 
 ### `options.tokens` ###
 
