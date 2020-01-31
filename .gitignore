@@ -1,5 +1,4 @@
 .DS_Store
 node_modules
 .tm_properties
-*.sublime-project
-*.sublime-workspace
+package-lock.json
