@@ -1,9 +1,3 @@
-// Use strict mode if on node v4.x.x or v5.x.x
-// 'use strict';
-
-const serializer = require( 'comment-serializer' );
-
-const src = `
 /**
  * This is the general description.
  *
@@ -30,12 +24,5 @@ const src = `
  *    <button class="btn">button.btn</button>
  *  </div>
  */
-var foo = 'bar';`;
 
-const mySerializer = serializer({
-    parsers: serializer.parsers()
-});
-
-mySerializer( src );
-
-// console.log( mySerializer( src ) );
+Blah, blah, blah... Some code...

@@ -1,25 +1,20 @@
-'use strict';
-
-module.exports = factory;
-module.exports.parsers = require( './lib/custom-parsers' );
-
-function factory( config ) {
-
-    const options = config || {};
+/**
+ * Creates a configured serializer function.
+ *
+ * @param {object} [options] The configuration object.
+ * @returns {function} The configured serializer.
+ */
+module.exports = ( options = {} ) => {
 
     const patterns = Object.assign({
         commentBegin: '/**',
         commentEnd: '*/',
         commentLinePrefix: '*',
         tagPrefix: '@'
-    }, options.tokens );
+    }, options.tokens || {} );
 
-    // Example: https://github.com/VerbalExpressions/JSVerbalExpressions/blob/master/VerbalExpressions.js#L63
-    const rCharacterClasses = /([\].|*?+(){}^$\\:=[])/g;
-
-    // Last match, URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/lastMatch
-    const lastMatch = '\\$&';
-
+    const rCharacterClasses = /([\].|*?+(){}^$\\:=[])/g; // Example: https://github.com/VerbalExpressions/JSVerbalExpressions/blob/master/VerbalExpressions.js#L63
+    const lastMatch = '\\$&'; // Last match, URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/lastMatch
     const safeTagPrefix = patterns.tagPrefix.replace( rCharacterClasses, lastMatch );
     const safeCommentBegin = patterns.commentBegin.replace( rCharacterClasses, lastMatch );
     const safeCommentLinePrefix = patterns.commentLinePrefix.replace( rCharacterClasses, lastMatch );
@@ -38,10 +33,10 @@ function factory( config ) {
      *  - source: the comment source
      *  - context: source between the `commentEnd` token and next `commentBegin` token (or EOF).
      *
-     * @param {String} sourceStr The source to parse.
+     * @param {string} sourceStr The source to parse.
      * @returns {Array}
      */
-    function explodeSections( sourceStr ) {
+    const explodeSections = ( sourceStr ) => {
 
         const sections = sourceStr.split( rComment );
         let prevSectionLineLength = getLinesLength( sections.shift() );
@@ -74,18 +69,18 @@ function factory( config ) {
      *  - preface
      *  - tags
      *
-     * @param {Number} lineNumber The comment's starting line number.
-     * @param {String} sourceStr The comment's source.
+     * @param {number} lineNumber The comment's starting line number.
+     * @param {string} sourceStr The comment's source.
      * @returns {Object}
      */
-    function stripAndSerializeComment( lineNumber, sourceStr ) {
+    const stripAndSerializeComment = ( lineNumber, sourceStr ) => {
 
         // Strip comment delimiter tokens
         let stripped = sourceStr
-        .replace( patterns.commentBegin, '' )
-        .replace( patterns.commentEnd, '' )
-        .split( '\n' )
-        .map( line => line.replace( rCommentLinePrefix, '' ) );
+            .replace( patterns.commentBegin, '' )
+            .replace( patterns.commentEnd, '' )
+            .split( '\n' )
+            .map( line => line.replace( rCommentLinePrefix, '' ) );
 
         // Determine the number of leading spaces to strip
         const prefixSpaces = stripped.reduce( function ( accum, line ) {
@@ -125,76 +120,76 @@ function factory( config ) {
     /**
      * Takes a tags block and serializes it into individual tag objects.
      *
-     * @param {Number} lineNumber The tags block starting line number.
-     * @param {String} tags The tags block.
+     * @param {number} lineNumber The tags block starting line number.
+     * @param {string} tags The tags block.
      * @returns {Array}
      */
-    function serializeTags( lineNumber, tags ) {
+    const serializeTags = ( lineNumber, tags ) => {
 
         return tags.split( /\n/ )
-        .reduce( function ( acc, line, index ) {
+            .reduce( function ( acc, line, index ) {
 
-            if ( !index || rTagName.test( line ) ) {
-                acc.push( `${line}\n` );
-            }
-            else {
-                acc[ acc.length - 1 ] += `${line}\n`;
-            }
-
-            return acc;
-
-        }, [] )
-        .map( function ( block ) {
-
-            const trimmed = block.trim();
-            const tag = block.match( rTagName )[0];
-
-            const result = {
-                line: lineNumber,
-                tag: tag.replace( patterns.tagPrefix, '' ),
-                value: trimmed.replace( tag, '' ).replace( rLeadSpaces, '' ),
-                valueParsed: [],
-                source: trimmed
-            };
-
-            lineNumber = lineNumber + getLinesLength( block );
-
-            return result;
-        })
-        .map( function ( tag ) {
-
-            const parser = parsers[ tag.tag ];
-
-            if ( parser ) {
-
-                try {
-
-                    tag.valueParsed = parser( tag.value );
+                if ( !index || rTagName.test( line ) ) {
+                    acc.push( `${line}\n` );
                 }
-                catch ( err ) {
-
-                    tag.error = err;
+                else {
+                    acc[ acc.length - 1 ] += `${line}\n`;
                 }
-            }
 
-            return tag;
-        });
+                return acc;
+
+            }, [] )
+            .map( function ( block ) {
+
+                const trimmed = block.trim();
+                const tag = block.match( rTagName )[0];
+
+                const result = {
+                    line: lineNumber,
+                    tag: tag.replace( patterns.tagPrefix, '' ),
+                    value: trimmed.replace( tag, '' ).replace( rLeadSpaces, '' ),
+                    valueParsed: [],
+                    source: trimmed
+                };
+
+                lineNumber = lineNumber + getLinesLength( block );
+
+                return result;
+            })
+            .map( function ( tag ) {
+
+                const parser = parsers[ tag.tag ];
+
+                if ( parser ) {
+
+                    try {
+
+                        tag.valueParsed = parser( tag.value );
+                    }
+                    catch ( err ) {
+
+                        tag.error = err;
+                    }
+                }
+
+                return tag;
+            });
     }
 
     /**
      * Get the number of newlines in a block of text.
      *
-     * @param {String} text Text to use.
-     * @returns {Number}
+     * @param {string} text Text to use.
+     * @returns {number}
      */
-    function getLinesLength( text ) {
+    const getLinesLength = ( text ) => {
 
         const matches = text.match( /\n/g );
 
         return matches ? matches.length : 0;
     }
 
-    return function ( src ) {
+    return ( src ) => {
 
         return explodeSections( src ).map( function ( section ) {
 
@@ -204,8 +199,7 @@ function factory( config ) {
             section.preface = result.preface;
             section.tags = result.tags;
 
-            // console.log( util.inspect( section, { depth: 5, colors: true } ) );
             return section;
         });
     };
-}
+};

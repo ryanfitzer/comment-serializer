@@ -1,6 +1,6 @@
 var assert = require( 'assert' );
 
-var serializer = require( '../index' );
+var serializer = require( '../src/index' );
 var templateComments = require( './lib/tagged-source-string' );
 var templateExpected = require( './lib/example-output' );
 
@@ -9,11 +9,16 @@ describe( 'Custom Tokens', function () {
 
     [
         [ '/**docs',    '*Line',    '**/',      '^' ],
-        [ '/**',        '\s',        '*/',       '@' ],
+        [ '/**',        '\s',        '*/',      '@' ],
         [ '/*',         '**',       '*/',       '@' ],
         [ '/*!',        '*',        '*/',       '@' ],
         [ '//!',        '//',        '///',     '@' ],
-        [ '/********************************************//**', '*', '***********************************************/', '@' ]
+        [
+            '/********************************************//**',
+            '*',
+            '***********************************************/',
+            '@'
+        ]
 
     ].forEach( function ( tokens ) {
 

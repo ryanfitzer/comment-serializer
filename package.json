@@ -1,19 +1,19 @@
 {
   "name": "comment-serializer",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "author": "Ryan Fitzer",
-  "description": "A serializer of source code comments.",
+  "description": "A serializer for syntax-configurable source code documentation block comments.",
   "license": "MIT",
-  "main": "index.js",
+  "main": "src/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/ryanfitzer/comment-serializer.git"
   },
   "engines": {
-    "node": ">=4.0.0"
+    "node": ">=7.0.0"
   },
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha"
+    "test": "mocha"
   },
   "keywords": [
     "comment",
@@ -22,13 +22,20 @@
     "comment block",
     "comment parser",
     "comments parser",
+    "custom comments serializer",
     "docblock",
     "doc block",
-    "documentation block"
+    "documentation block",
+    "jsdoc",
+    "javadoc",
+    "cssdoc",
+    "htmldoc",
+    "customdoc"
   ],
   "devDependencies": {
-    "eslint": "^3.17.1",
-    "mocha": "^7.0.1"
+    "eslint": "^8.3.0",
+    "eslint-config-prettier": "^8.3.0",
+    "mocha": "^9.1.3"
   },
-  "runkitExampleFilename": "example.js"
+  "runkitExampleFilename": "runkit.config.js"
 }

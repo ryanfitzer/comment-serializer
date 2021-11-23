@@ -2,48 +2,59 @@
 
 [![NPM version](https://badge.fury.io/js/comment-serializer.svg)](https://www.npmjs.com/package/comment-serializer) [![Try on RunKit](https://badge.runkitcdn.com/comment-serializer.svg)](https://runkit.com/npm/comment-serializer)
 
-Comment Serializer parses a source string for documentation comment blocks and returns a serialized object. It is syntax agnostic and can be configured to support most documentation comment styles. 
+Comment Serializer parses a source string for documentation comment blocks and returns a serialized object. It is language and comment syntax style agnostic. It configured to support most documentation comment block styles. 
 
+Try out an [example on RunKit](https://runkit.com/npm/comment-serializer).
 
 
 ## Usage ##
 
-```js
-const serializer = require( 'comment-serializer' );
+**source-code.txt**:
+```txt
+//!
+ // This is the general description.
+ //
+ // ^title Button
+ // ^markup <button class="btn">My Button</button>
+ ///
 
-const mySerializer = serializer( { /* options */ } );
-
-const source = `
-/**
- * This is the general description.
- *
- * @title Button
- *
- * @markup <button class="btn">My Button</button>
- */
-.btn {
-  color: red;
-}`;
-
-const result = mySerializer( source );
-
+Blah, blah, blah... Some code...
 ```
 
-Try out a [more robust example on RunKit](https://runkit.com/npm/comment-serializer).
+**my-serializer.js**
+```js
+const { readFileSync } = require( 'fs' );
+const serializer = require( 'comment-serializer' );
 
+const src = readFileSync( 'source-code.txt', { encoding: 'utf8' } );
+
+const mySerializer = serializer({
+  tokens: {
+    commentBegin: '//!',
+    commentLinePrefix: '//',
+    tagPrefix: '^',
+    commentEnd: '///'
+  }
+});
+
+const result = mySerializer( src );
+```
 
 
 ## Options ##
 
-
 ### `options.parsers` ###
 
   - Required: No
-  - Type: `Object`
+  - Type: `object`
 
-Customize the handling of tags. An object where the tag name is the key and the value is a function. The function receives the tag's value and returns the parsed value.
+Custom tag parsers. An object of functions, keyed by the name of the tag to be parsed. The function receives the tag's content and must return the parsed value as a `string`.
 
-Here's a simple example:
+When no parsers are provided, tags are serialized into `tag` and `value` pairs, but their values are not parsed in any way.
+
+You can find some examples of custom parsers in [`examples/custom-parsers/parsers.js`](examples/custom-parsers/parsers.js)
+
+#### Example ####
 
 Source to parse:
 
@@ -58,9 +69,7 @@ The custom parser:
 ```js
 const mySerializer = serializer({
   parsers: {
-    mySpecialTag: function( value ) {
-      return value.toUpperCase();
-    }
+    mySpecialTag: ( value ) => value.toUpperCase()
   }
 });
 ```
@@ -99,7 +108,7 @@ A more advanced example:
 ```js
 const mySerializer = serializer({
   parsers: {
-    'mySpecialTag': function( value ) {
+    'mySpecialTag': ( value ) => {
     
       const match = value.match( /\s*[-*]\s+[\w-_]*/g );
       
@@ -136,20 +145,18 @@ Result:
 }]
 ```
 
-You can find more examples of custom parsers in [`./lib/custom-parsers.js`](lib/custom-parsers.js)
-
 ### `options.tokens` ###
 
   - Required: No
-  - Type: `Object`
+  - Type: `object`
 
-Customize the comment delimiters.
+Customize the comment delimiters. The default tokens use [JSDoc comment block](https://google.github.io/styleguide/jsguide.html#jsdoc) syntax.
 
 
 ### `options.tokens.commentBegin` ###
 
   - Required: No
-  - Type: `String`
+  - Type: `string`
   - Default: `'/**'`
 
 The delimiter marking the beginning of a comment block.
@@ -158,7 +165,7 @@ The delimiter marking the beginning of a comment block.
 ### `options.tokens.commentLinePrefix` ###
 
   - Required: No
-  - Type: `String`
+  - Type: `string`
   - Default: `'*'`
 
 The delimiter marking a new line in the body of a comment block.
@@ -167,7 +174,7 @@ The delimiter marking a new line in the body of a comment block.
 ### `options.tokens.tagPrefix` ###
 
   - Required: No
-  - Type: `String`
+  - Type: `string`
   - Default: `'@'`
 
 The delimiter marking the start of a tag in the comment body.
@@ -176,18 +183,18 @@ The delimiter marking the start of a tag in the comment body.
 ### `options.tokens.commentEnd` ###
 
   - Required: No
-  - Type: `String`
+  - Type: `string`
   - Default: `'*/'`
 
 The delimiter marking the end of a comment block.
 
 
 
-## Syntax Support ##
+## Token Syntax Support ##
 
 Comment delimiters:
 
-```text
+```
 /**       <- commentBegin
  *        <- commentLinePrefix
  * @tag   <- tagPrefix (the "@" symbol)
@@ -200,11 +207,10 @@ While most documentation comment styles should be supported, there are a few rul
 
   2. Delimiters should not rely on a whitespace character as a delimiter. For example, the following style would not be supported:
 
-  ```text
+  ```
   /**
     An unsupported style.
     
     @tag
    */
   ```
-
