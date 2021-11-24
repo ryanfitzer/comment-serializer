@@ -1,7 +1,0 @@
-test
-examples
-node_modules
-.travis.yml
-.eslintrc.js
-.prettierignore
-.prettierrc.json

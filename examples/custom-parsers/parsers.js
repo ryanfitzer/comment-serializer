@@ -5,7 +5,7 @@ module.exports = {
      * @usage `@state :hover This is a description`.
      *
      * @param {string} value The tag's value to parse.
-     * @returns {array}
+     * @return {array}
      */
     state: (value) => {
         const match = value.match(/(^:[-_a-zA-Z]+)(.*)/);
@@ -34,7 +34,7 @@ module.exports = {
      * @usage `@modifier ._some_class This is a description`.
      *
      * @param {string} value The tag's value to parse.
-     * @returns {array}
+     * @return {array}
      */
     modifier: (value) => {
         const match = value.match(/^(\.?-?[_a-zA-Z]+[_a-zA-Z0-9-]*)(.*)/);
@@ -71,7 +71,7 @@ module.exports = {
      *           </div>`
      *
      * @param {string} value The tag's value to parse.
-     * @returns {array}
+     * @return {array}
      */
     example: (value) => {
         const match = value.match(/([^\n]*)\n((?:.|\n)*)/);
@@ -108,7 +108,7 @@ module.exports = {
      *          * tag-3`
      *
      * @param {string} value The tag's value to parse.
-     * @returns {array}
+     * @return {array}
      */
     tags: (value) => {
         const match = value.match(/\s*[-*]\s+[\w-_]*/g);

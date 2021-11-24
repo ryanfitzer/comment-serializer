@@ -2,28 +2,44 @@
  * Creates a configured serializer function.
  *
  * @param {object} [options] The configuration object.
- * @returns {function} The configured serializer.
+ * @return {function} The configured serializer.
  */
-module.exports = ( options = {} ) => {
-
-    const patterns = Object.assign({
-        commentBegin: '/**',
-        commentEnd: '*/',
-        commentLinePrefix: '*',
-        tagPrefix: '@'
-    }, options.tokens || {} );
+module.exports = (options = {}) => {
+    const patterns = Object.assign(
+        {
+            commentBegin: '/**',
+            commentEnd: '*/',
+            commentLinePrefix: '*',
+            tagPrefix: '@',
+        },
+        options.tokens || {}
+    );
 
     const rCharacterClasses = /([\].|*?+(){}^$\\:=[])/g; // Example: https://github.com/VerbalExpressions/JSVerbalExpressions/blob/master/VerbalExpressions.js#L63
     const lastMatch = '\\$&'; // Last match, URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/lastMatch
-    const safeTagPrefix = patterns.tagPrefix.replace( rCharacterClasses, lastMatch );
-    const safeCommentBegin = patterns.commentBegin.replace( rCharacterClasses, lastMatch );
-    const safeCommentLinePrefix = patterns.commentLinePrefix.replace( rCharacterClasses, lastMatch );
-    const safeCommentEnd = patterns.commentEnd.replace( rCharacterClasses, lastMatch );
+    const safeTagPrefix = patterns.tagPrefix.replace(
+        rCharacterClasses,
+        lastMatch
+    );
+    const safeCommentBegin = patterns.commentBegin.replace(
+        rCharacterClasses,
+        lastMatch
+    );
+    const safeCommentLinePrefix = patterns.commentLinePrefix.replace(
+        rCharacterClasses,
+        lastMatch
+    );
+    const safeCommentEnd = patterns.commentEnd.replace(
+        rCharacterClasses,
+        lastMatch
+    );
 
     const rLeadSpaces = /^[^\S\n]*/;
-    const rComment = new RegExp( `(${safeCommentBegin}\\s*\\n\\s*${safeCommentLinePrefix}(?:.|\\n)*?${safeCommentEnd}\\s*\\n?)` );
-    const rCommentLinePrefix = new RegExp( `^(\\s)*${safeCommentLinePrefix}` );
-    const rTagName = new RegExp( `^${safeTagPrefix}([\\w-])+` );
+    const rComment = new RegExp(
+        `(${safeCommentBegin}\\s*\\n\\s*${safeCommentLinePrefix}(?:.|\\n)*?${safeCommentEnd}\\s*\\n?)`
+    );
+    const rCommentLinePrefix = new RegExp(`^(\\s)*${safeCommentLinePrefix}`);
+    const rTagName = new RegExp(`^${safeTagPrefix}([\\w-])+`);
     const parsers = options.parsers || {};
 
     /**
@@ -34,33 +50,28 @@ module.exports = ( options = {} ) => {
      *  - context: source between the `commentEnd` token and next `commentBegin` token (or EOF).
      *
      * @param {string} sourceStr The source to parse.
-     * @returns {Array}
+     * @return {array}
      */
-    const explodeSections = ( sourceStr ) => {
+    const explodeSections = (sourceStr) => {
+        const sections = sourceStr.split(rComment);
+        let prevSectionLineLength = getLinesLength(sections.shift());
 
-        const sections = sourceStr.split( rComment );
-        let prevSectionLineLength = getLinesLength( sections.shift() );
-
-        return sections.reduce( function ( accum, section, index ) {
-
+        return sections.reduce(function (accum, section, index) {
             // Group each comment with its context
-            if ( index % 2 ) {
-
-                accum[ accum.length - 1 ].context = section.trimRight();
-            }
-            else {
+            if (index % 2) {
+                accum[accum.length - 1].context = section.trimRight();
+            } else {
                 accum.push({
                     line: prevSectionLineLength + 1,
-                    source: section.trim()
+                    source: section.trim(),
                 });
             }
 
-            prevSectionLineLength += getLinesLength( section );
+            prevSectionLineLength += getLinesLength(section);
 
             return accum;
-
-        }, [] );
-    }
+        }, []);
+    };
 
     /**
      * Strip and serialize a comment into its various parts.
@@ -71,129 +82,126 @@ module.exports = ( options = {} ) => {
      *
      * @param {number} lineNumber The comment's starting line number.
      * @param {string} sourceStr The comment's source.
-     * @returns {Object}
+     * @return {object}
      */
-    const stripAndSerializeComment = ( lineNumber, sourceStr ) => {
-
+    const stripAndSerializeComment = (lineNumber, sourceStr) => {
         // Strip comment delimiter tokens
         let stripped = sourceStr
-            .replace( patterns.commentBegin, '' )
-            .replace( patterns.commentEnd, '' )
-            .split( '\n' )
-            .map( line => line.replace( rCommentLinePrefix, '' ) );
+            .replace(patterns.commentBegin, '')
+            .replace(patterns.commentEnd, '')
+            .split('\n')
+            .map((line) => line.replace(rCommentLinePrefix, ''));
 
         // Determine the number of leading spaces to strip
-        const prefixSpaces = stripped.reduce( function ( accum, line ) {
-
-            if ( !accum.length && line.match( /\s*\S|\n/ ) ) {
-                accum = line.match( /\s*/ )[0];
+        const prefixSpaces = stripped.reduce(function (accum, line) {
+            if (!accum.length && line.match(/\s*\S|\n/)) {
+                accum = line.match(/\s*/)[0];
             }
 
             return accum;
         });
 
         // Strip leading spaces
-        stripped = stripped.map( line => line.replace( prefixSpaces, '' ) );
+        stripped = stripped.map((line) => line.replace(prefixSpaces, ''));
 
         // Get line number for first tag
-        const firstTagLineNumber = stripped.reduce( function ( accum, line, index ) {
-
-            if ( isNaN( accum ) && line.match( rTagName ) ) {
+        const firstTagLineNumber = stripped.reduce(function (
+            accum,
+            line,
+            index
+        ) {
+            if (isNaN(accum) && line.match(rTagName)) {
                 accum = index;
             }
 
             return accum;
+        },
+        undefined);
 
-        }, undefined );
-
-        const comment = stripped.join( '\n' ).trim();
-        const tags = stripped.splice( firstTagLineNumber ).join( '\n' );
-        const preface = stripped.join( '\n' ).trim();
+        const comment = stripped.join('\n').trim();
+        const tags = stripped.splice(firstTagLineNumber).join('\n');
+        const preface = stripped.join('\n').trim();
 
         return {
             preface,
             content: comment,
-            tags: serializeTags( lineNumber + firstTagLineNumber, tags )
+            tags: serializeTags(lineNumber + firstTagLineNumber, tags),
         };
-    }
+    };
 
     /**
      * Takes a tags block and serializes it into individual tag objects.
      *
      * @param {number} lineNumber The tags block starting line number.
      * @param {string} tags The tags block.
-     * @returns {Array}
+     * @return {array}
      */
-    const serializeTags = ( lineNumber, tags ) => {
-
-        return tags.split( /\n/ )
-            .reduce( function ( acc, line, index ) {
-
-                if ( !index || rTagName.test( line ) ) {
-                    acc.push( `${line}\n` );
-                }
-                else {
-                    acc[ acc.length - 1 ] += `${line}\n`;
+    const serializeTags = (lineNumber, tags) => {
+        return tags
+            .split(/\n/)
+            .reduce(function (acc, line, index) {
+                if (!index || rTagName.test(line)) {
+                    acc.push(`${line}\n`);
+                } else {
+                    acc[acc.length - 1] += `${line}\n`;
                 }
 
                 return acc;
-
-            }, [] )
-            .map( function ( block ) {
-
+            }, [])
+            .map(function (block) {
                 const trimmed = block.trim();
-                const tag = block.match( rTagName )[0];
+                const tag = block.match(rTagName)[0];
 
                 const result = {
                     line: lineNumber,
-                    tag: tag.replace( patterns.tagPrefix, '' ),
-                    value: trimmed.replace( tag, '' ).replace( rLeadSpaces, '' ),
+                    tag: tag.replace(patterns.tagPrefix, ''),
+                    value: trimmed.replace(tag, '').replace(rLeadSpaces, ''),
                     valueParsed: [],
-                    source: trimmed
+                    source: trimmed,
                 };
 
-                lineNumber = lineNumber + getLinesLength( block );
+                lineNumber = lineNumber + getLinesLength(block);
 
                 return result;
             })
-            .map( function ( tag ) {
+            .map(function (tag) {
+                const parser = parsers[tag.tag];
 
-                const parser = parsers[ tag.tag ];
+                if (!parser) return tag;
 
-                if ( parser ) {
-
-                    try {
-
-                        tag.valueParsed = parser( tag.value );
-                    }
-                    catch ( err ) {
-
-                        tag.error = err;
-                    }
+                try {
+                    tag.valueParsed = parser(tag.value);
+                } catch (e) {
+                    tag.error = new Error(
+                        `The "${tag.tag}" tag encountered an error while parsing the following value: ${tag.value}.`,
+                        {
+                            cause: e,
+                        }
+                    );
                 }
 
                 return tag;
             });
-    }
+    };
 
     /**
      * Get the number of newlines in a block of text.
      *
      * @param {string} text Text to use.
-     * @returns {number}
+     * @return {number}
      */
-    const getLinesLength = ( text ) => {
-
-        const matches = text.match( /\n/g );
+    const getLinesLength = (text) => {
+        const matches = text.match(/\n/g);
 
         return matches ? matches.length : 0;
-    }
+    };
 
-    return ( src ) => {
-
-        return explodeSections( src ).map( function ( section ) {
-
-            const result = stripAndSerializeComment( section.line, section.source );
+    return (src) => {
+        return explodeSections(src).map(function (section) {
+            const result = stripAndSerializeComment(
+                section.line,
+                section.source
+            );
 
             section.content = result.content;
             section.preface = result.preface;

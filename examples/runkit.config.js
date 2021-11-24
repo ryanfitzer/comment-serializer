@@ -1,4 +1,4 @@
-const createSerializer = require('./src');
+const createSerializer = require('../src');
 
 const src = `
 //!
