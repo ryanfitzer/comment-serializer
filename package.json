@@ -4,21 +4,21 @@
   "description": "A serializer for syntax-configurable source code documentation block comments.",
   "license": "MIT",
   "author": {
-		"name": "Ryan Fitzer",
-		"email": "ryan@ryanfitzer.com",
-		"url": "http://ryanfitzer.com"
+    "name": "Ryan Fitzer",
+    "email": "ryan@ryanfitzer.com",
+    "url": "http://ryanfitzer.com"
   },
   "main": "src/index.js",
   "repository": "ryanfitzer/comment-serializer",
   "engines": {
-    "node": ">=7.0.0"
+    "node": ">=10.0.0"
   },
   "scripts": {
     "test": "mocha"
   },
   "files": [
-		"src"
-	],
+    "src"
+  ],
   "devDependencies": {
     "eslint": "^8.3.0",
     "eslint-config-prettier": "^8.3.0",
