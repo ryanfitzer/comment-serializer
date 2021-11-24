@@ -1,6 +1,6 @@
 # Comment Serializer
 
-[![NPM version](https://badge.fury.io/js/comment-serializer.svg)](https://www.npmjs.com/package/comment-serializer) [![Try on RunKit](https://badge.runkitcdn.com/comment-serializer.svg)](https://runkit.com/npm/comment-serializer)
+![License](https://img.shields.io/npm/l/comment-serializer) ![Version](https://img.shields.io/npm/v/comment-serializer) ![Node support](https://img.shields.io/node/v/comment-serializer) ![Bundle size](https://img.shields.io/bundlephobia/minzip/comment-serializer) [![Downloads](https://img.shields.io/npm/dm/comment-serializer)](https://www.npmjs.com/package/comment-serializer)
 
 Comment Serializer parses a source string for documentation comment blocks and returns a serialized object. It is language and comment syntax style agnostic. It configured to support most documentation comment block styles.
 
